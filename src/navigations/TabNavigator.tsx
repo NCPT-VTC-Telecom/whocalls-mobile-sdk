@@ -5,10 +5,17 @@ import Home from '../screens/Home';
 
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import ContactsList from '../screens/Contacts';
+import HeaderNavigator from './HeaderNavigator';
+import {Header} from '@react-navigation/elements';
+import Settings from '../screens/Settings';
+import AddNumbers from '../screens/AddNumbers';
 
 const Tab = createBottomTabNavigator();
 
 const TabNavigator = () => {
+  const renderHeader = (name: string) => () => {
+    return <HeaderNavigator name={name} />;
+  };
   return (
     <Tab.Navigator
       screenOptions={({route}) => ({
@@ -25,18 +32,18 @@ const TabNavigator = () => {
             iconName = 'settings';
           }
 
-          // Return the Icon component
           return (
             <MaterialIcons name={`${iconName}`} size={size} color={color} />
           );
         },
-        tabBarActiveTintColor: '#00A88E',
+        tabBarActiveTintColor: 'tomato',
         tabBarInactiveTintColor: 'gray',
+        header: renderHeader(route.name),
       })}>
       <Tab.Screen name="Kiểm tra" component={Home} />
       <Tab.Screen name="Lịch sử" component={ContactsList} />
-      <Tab.Screen name="Thêm" component={Home} />
-      <Tab.Screen name="Cài đặt" component={Home} />
+      <Tab.Screen name="Thêm" component={AddNumbers} />
+      <Tab.Screen name="Cài đặt" component={Settings} />
     </Tab.Navigator>
   );
 };

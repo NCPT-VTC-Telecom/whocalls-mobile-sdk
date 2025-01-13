@@ -18,12 +18,33 @@ type SectionProps = PropsWithChildren<{
 function App(): React.JSX.Element {
   const Stack = createNativeStackNavigator();
 
+  const screen = [
+    {
+      name: 'Home',
+      component: TabNavigator,
+      options: {title: 'Home'},
+    },
+    {
+      name: 'Welcome',
+      component: Welcome,
+      options: {title: 'Details Screen'},
+    },
+  ];
+
   return (
     <SafeAreaProvider>
       <NavigationContainer>
-        <Stack.Navigator screenOptions={{headerShown: false}} initialRouteName="Home">
-          <Stack.Screen name="Welcome" component={Welcome} />
-          <Stack.Screen name="Home" component={TabNavigator} />
+        <Stack.Navigator
+          screenOptions={{headerShown: false}}
+          initialRouteName="Home">
+          {screen.map((screen, index) => (
+            <Stack.Screen
+              key={index}
+              name={screen.name}
+              component={screen.component}
+              options={{title: screen.options.title}}
+            />
+          ))}
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
