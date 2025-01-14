@@ -1,28 +1,14 @@
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
+import Text from '../../../components/Text';
 import React from 'react';
-
-import {
-  Button,
-  Modal,
-  Portal,
-  Provider as PaperProvider,
-} from 'react-native-paper';
+import Headers from '../../../components/Header';
 
 const OptionsList = () => {
   return (
-    <PaperProvider>
-      <Portal>
-        <Modal
-          visible={true}
-          onDismiss={() => {}}
-          contentContainerStyle={{backgroundColor: 'white', padding: 20}}>
-          <Text>Example Modal. Click outside this area to dismiss.</Text>
-        </Modal>
-      </Portal>
-      <Button style={{marginTop: 30}} onPress={() => {}}>
-        Show
-      </Button>
-    </PaperProvider>
+    <View>
+      <Headers />
+      <Text>Hạng mục chặn</Text>
+    </View>
   );
 };
 

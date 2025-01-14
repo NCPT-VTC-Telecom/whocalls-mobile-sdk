@@ -1,0 +1,14 @@
+{
+  "name": "react-native-who-calls",
+  "version": "0.0.0",
+  "description": "Modules for checking numbers and reputation for phone call and identity",
+  "main": "src/index",
+  "author": " <> ()",
+  "license": "UNLICENSED",
+  "homepage": "#readme",
+  "create-react-native-library": {
+    "type": "legacy-module",
+    "languages": "kotlin-objc",
+    "version": "0.45.5"
+  }
+}

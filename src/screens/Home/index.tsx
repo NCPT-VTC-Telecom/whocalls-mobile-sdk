@@ -5,6 +5,8 @@ import Text from '../../components/Text';
 import {Button, TextInput} from 'react-native-paper';
 import {isPhoneNumber} from '../../helpers';
 
+import WhoCallsSDK from 'react-native-who-calls';
+
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
 interface IState {
@@ -17,8 +19,21 @@ const Home = () => {
     text: '',
   });
 
+  React.useEffect(() => {
+    initialiseSDK();
+  }, []);
+
   const onChangeText = (value: string) => {
     setState(s => ({...s, text: value}));
+  };
+
+  const initialiseSDK = async () => {
+    try {
+      const result = await WhoCallsSDK.onCreate();
+      console.log('result', result);
+    } catch (error) {
+      console.log('error', error);
+    }
   };
 
   return (
@@ -70,6 +85,6 @@ const createStyles = () => {
       width: 200,
       height: 200,
     },
-    title: {fontSize: 20, fontWeight: '500'},
+    title: {fontSize: 25, fontWeight: '500'},
   });
 };

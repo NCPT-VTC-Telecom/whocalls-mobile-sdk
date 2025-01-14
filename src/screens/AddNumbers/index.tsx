@@ -138,7 +138,7 @@ const createStyles = () => {
       width: 200,
       height: 200,
     },
-    title: {fontSize: 20, fontWeight: '500'},
+    title: {fontSize: 25, fontWeight: '500'},
     button: {
       flex: 1,
       justifyContent: 'center',

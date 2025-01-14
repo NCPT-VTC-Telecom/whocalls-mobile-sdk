@@ -1,7 +1,12 @@
 import {StyleSheet, Text, View} from 'react-native';
 import React from 'react';
 
-const HeaderNavigator = ({name}: {name: string}) => {
+interface HeaderNavigatorProps {
+  isBack?: boolean;
+  name: string;
+}
+
+const HeaderNavigator = ({isBack, name}: {isBack?: boolean; name: string}) => {
   return (
     <View
       style={{

@@ -3,7 +3,6 @@ import {
   Alert,
   FlatList,
   StyleSheet,
-  Text,
   View,
 } from 'react-native';
 import React from 'react';
@@ -17,6 +16,10 @@ import {Input} from '@rneui/themed';
 
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {SheetManager} from 'react-native-actions-sheet';
+import EmptyComponents from '../../components/Empty';
+import Loading from '../../components/Loading';
+
+import Text from '../../components/Text';
 
 const ContactsList = () => {
   const styles = createStyles();
@@ -28,9 +31,7 @@ const ContactsList = () => {
   React.useEffect(() => {
     checkContactsPermission();
     console.log('permissionStatus', permissionStatus);
-    // if (permissionStatus === true) {
-    //   getContact();
-    // }
+    if (permissionStatus === RESULTS.GRANTED) getContact();
   }, []);
   const checkContactsPermission = async () => {
     try {
@@ -73,6 +74,8 @@ const ContactsList = () => {
     }
   };
 
+  console.log('listContacts', listContacts);
+
   const renderItemSeparator = () => {
     return (
       <View
@@ -87,6 +90,10 @@ const ContactsList = () => {
 
   const renderItem = (item: any) => {
     return <Item item={item} />;
+  };
+
+  const renderEmpty = () => {
+    return <EmptyComponents onPress={getContact} />;
   };
 
   const renderEndReached = () => {
@@ -114,7 +121,7 @@ const ContactsList = () => {
     );
 
   return (
-    <View>
+    <View style={styles.container}>
       <Input
         style={styles.input}
         placeholder="Nhập số điện thoại để tìm kiếm"
@@ -137,13 +144,17 @@ const ContactsList = () => {
       <Text style={{fontWeight: '500', paddingHorizontal: 8, fontSize: 20}}>
         Danh bạ của bạn
       </Text>
-      <FlatList
-        data={listContacts || [1, 2, 3, 4, 5]}
-        renderItem={renderItem}
-        ItemSeparatorComponent={renderItemSeparator}
-        onEndReached={renderEndReached}
-      />
-      <ContactsList />
+      {loading ? (
+        <Loading />
+      ) : (
+        <FlatList
+          data={listContacts}
+          renderItem={renderItem}
+          ItemSeparatorComponent={renderItemSeparator}
+          onEndReached={renderEndReached}
+          ListEmptyComponent={renderEmpty}
+        />
+      )}
     </View>
   );
 };
@@ -152,6 +163,10 @@ export default ContactsList;
 
 const createStyles = () => {
   return StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: 'white',
+    },
     listItem: {
       flexDirection: 'row',
       padding: 8,

@@ -107,9 +107,29 @@ android {
     }
 }
 
+repositories {
+  mavenCentral()
+  google()
+   flatDir {
+     dirs 'src/libs'  // Ensure this points to the directory containing your AAR
+   }
+}
+
+
+project.ext.react = [
+        entryFile: "index.js"
+]
+// project.ext.vectoricons = [
+//     iconFontNames: ['MaterialIcons.ttf', 'FontAwesome.ttf', 'AntDesign.ttf'] // Add any other required fonts
+// ]
+
 dependencies {
+    // implementation fileTree(dir: "libs", include: ["*.jar", "*.aar"])
+    implementation(name: 'KL_Base_SDK_Android_5.15.0.506_Release', ext: 'aar')
+    implementation(name: 'KL_Mobile_SDK_Android_5.15.0.506_WhocallsRelease', ext: 'aar')
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
+    implementation project(':react-native-who-calls')
 //    implementation project(':react-native-vector-icons')
     apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
     if (hermesEnabled.toBoolean()) {

@@ -10,6 +10,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import Welcome from './src/Welcome';
 import TabNavigator from './src/navigations/TabNavigator';
+import OptionsList from './src/screens/Settings/Options';
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -23,6 +24,11 @@ function App(): React.JSX.Element {
       name: 'Home',
       component: TabNavigator,
       options: {title: 'Home'},
+    },
+    {
+      name: 'OptionsList' as string,
+      component: OptionsList,
+      options: {title: 'OptionsList'},
     },
     {
       name: 'Welcome',
