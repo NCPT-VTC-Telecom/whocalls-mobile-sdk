@@ -1,7 +1,6 @@
 import React from 'react';
 
 import {name as appName} from './app.json';
-import type {PropsWithChildren} from 'react';
 import {AppRegistry} from 'react-native';
 
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
@@ -11,10 +10,6 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 import Welcome from './src/Welcome';
 import TabNavigator from './src/navigations/TabNavigator';
 import OptionsList from './src/screens/Settings/Options';
-
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
 
 function App(): React.JSX.Element {
   const Stack = createNativeStackNavigator();

@@ -3,7 +3,7 @@ import React from 'react';
 import Text from '../../components/Text';
 import {Avatar} from '@rneui/base';
 import {ContactInfomation, ContactList} from '../../interface';
-import {SheetManager} from 'react-native-actions-sheet';
+// import {SheetManager} from 'react-native-actions-sheet';
 import ContactInfo from './ContactInfo';
 
 const Item = ({item}: {item: ContactList}) => {

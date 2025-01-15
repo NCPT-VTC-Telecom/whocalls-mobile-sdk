@@ -1,7 +1,6 @@
 import {View, Text} from 'react-native';
 import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import Home from '../screens/Home';
 
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import ContactsList from '../screens/Contacts';
@@ -9,6 +8,7 @@ import HeaderNavigator from './HeaderNavigator';
 import {Header} from '@react-navigation/elements';
 import Settings from '../screens/Settings';
 import AddNumbers from '../screens/AddNumbers';
+import CheckInformation from '../screens/Home';
 
 const Tab = createBottomTabNavigator();
 
@@ -36,11 +36,11 @@ const TabNavigator = () => {
             <MaterialIcons name={`${iconName}`} size={size} color={color} />
           );
         },
-        tabBarActiveTintColor: 'tomato',
+        tabBarActiveTintColor: '#00A88E',
         tabBarInactiveTintColor: 'gray',
         header: renderHeader(route.name),
       })}>
-      <Tab.Screen name="Kiểm tra" component={Home} />
+      <Tab.Screen name="Kiểm tra" component={CheckInformation} />
       <Tab.Screen name="Lịch sử" component={ContactsList} />
       <Tab.Screen name="Thêm" component={AddNumbers} />
       <Tab.Screen name="Cài đặt" component={Settings} />

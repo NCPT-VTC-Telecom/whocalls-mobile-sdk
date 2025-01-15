@@ -14,8 +14,11 @@ const EmptyComponents = ({onPress}: {onPress: () => void}) => {
     <View style={styles.container}>
       <Image source={images.empty} style={styles.images} />
       <Text style={styles.title}>Chưa có dữ liệu</Text>
-      <Button mode="contained" onPress={onPress} style={{borderRadius: 8}}>
-        <Text style={{color: 'white'}}>Tải lại</Text>
+      <Button
+        mode="contained"
+        onPress={onPress}
+        style={{borderRadius: 8, backgroundColor: '#00A88E'}}>
+        <Text style={{color: 'white', fontWeight: '700'}}>Tải lại</Text>
       </Button>
     </View>
   );
@@ -32,12 +35,13 @@ const createStyles = () => {
       backgroundColor: 'white',
       alignContent: 'center',
       alignSelf: 'center',
+      gap: 8,
     },
 
     title: {
       fontSize: 20,
-      fontWeight: '500',
-      //   flex: 1,
+      fontWeight: '700',
+
       alignContent: 'center',
       alignSelf: 'center',
     },

@@ -2,36 +2,47 @@ import {View, Image, StyleSheet, TouchableOpacity, Alert} from 'react-native';
 import React from 'react';
 import {images} from '../../assets';
 import Text from '../../components/Text';
-import {Button, Chip, TextInput} from 'react-native-paper';
+import {Button, Chip, Switch, TextInput} from 'react-native-paper';
 import {isPhoneNumber} from '../../helpers';
 
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import Entypo from 'react-native-vector-icons/Entypo';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 interface IState {
   text: string;
-  type: string;
+  type: boolean;
+  spamList: string[];
 }
 
 const AddNumbers = () => {
   const styles = createStyles();
   const [state, setState] = React.useState<IState>({
     text: '',
-    type: '',
+    type: false,
+    spamList: [],
   });
 
   const onChangeText = (value: string) => {
     setState(s => ({...s, text: value}));
   };
 
-  const onChangeType = (value: string) => () => {
-    setState(s => ({...s, type: value}));
+  const onChangeType = () => {
+    setState(s => ({...s, type: !s.type, spamList: []}));
+  };
+
+  const appendNumberType = (value: string) => () => {
+    setState(s => ({...s, spamList: [...s.spamList, value]}));
+  };
+
+  const removeType = (value: string) => () => {
+    setState(s => ({
+      ...s,
+      spamList: s.spamList.filter(item => item !== value),
+    }));
   };
 
   return (
     <View style={styles.container}>
-      <View>
+      <View style={styles.titleContainer}>
         <Image source={images.logo} style={styles.image} />
         <Text style={styles.title} variant="h2">
           Thêm số điện thoại
@@ -52,62 +63,58 @@ const AddNumbers = () => {
         disableFullscreenUI
       />
       {!!state?.text && !isPhoneNumber(state.text) && (
-        <Text style={{color: 'red'}}>{'Không hợp lệ'}</Text>
+        <Text style={{color: 'red'}}>{'Số điện thoại không hợp lệ '}</Text>
       )}
-      <Text>Loại số điện thoại này</Text>
       <View
         style={{
           flexDirection: 'row',
-          gap: 8,
           justifyContent: 'center',
           alignItems: 'center',
         }}>
-        <TouchableOpacity
-          style={[styles.button, {backgroundColor: '#FF335C'}]}
-          onPress={onChangeType('spam')}>
-          <Entypo name="block" size={20} color="white" />
-          <Text style={styles.label}>Số rác</Text>
-          {state?.type === 'spam' && (
-            <FontAwesome
-              name="check-circle"
-              size={20}
-              color="white"
-              style={{position: 'absolute', right: 0, top: 0}}
-            />
-          )}
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.button, {backgroundColor: '#33C2FF'}]}
-          onPress={onChangeType('normal')}>
-          <Entypo name="circle-with-plus" size={20} color="white" />
-          <Text style={styles.label}>Số bình thường</Text>
-          {state?.type === 'normal' && (
-            <FontAwesome
-              name="check-circle"
-              size={20}
-              color="white"
-              style={{position: 'absolute', right: 0, top: 0}}
-            />
-          )}
-        </TouchableOpacity>
+        <Text style={{flex: 1}}>Có phải hạng mục rác?</Text>
+        <Switch value={state.type} onChange={onChangeType} />
       </View>
-      {state?.type === 'spam' && (
-        <View>
-          <Text>Số điện thoại này thuộc hạng mục nào</Text>
+
+      {state?.type === true && (
+        <View style={{gap: 8}}>
+          <Text style={{fontWeight: '700', fontSize: 15}}>
+            Số điện thoại này thuộc hạng mục nào
+          </Text>
           <View style={{flexWrap: 'wrap', flexDirection: 'row', gap: 8}}>
-            <Chip icon="check" onPress={() => {}}>
+            <Chip
+              icon="check"
+              onPress={appendNumberType('spam')}
+              selected={state.spamList.includes('spam')}
+              selectedColor={'#00A88E'}>
               Cuộc gọi rác
             </Chip>
-            <Chip icon="check" onPress={() => {}}>
+            <Chip
+              icon="check"
+              onPress={appendNumberType('ad')}
+              selected={state.spamList.includes('ad')}
+              selectedColor="#00A88E"
+              onLongPress={removeType('ad')}>
               Quảng cáo
             </Chip>
-            <Chip icon="check" onPress={() => {}}>
+            <Chip
+              icon="check"
+              onPress={appendNumberType('scam')}
+              selected={state.spamList.includes('scam')}
+              selectedColor="#00A88E">
               Lừa đảo
             </Chip>
-            <Chip icon="check" onPress={() => {}}>
+            <Chip
+              icon="check"
+              onPress={appendNumberType('harass')}
+              selected={state.spamList.includes('harass')}
+              selectedColor="#00A88E">
               Làm phiền
             </Chip>
-            <Chip icon="check" onPress={() => {}}>
+            <Chip
+              icon="check"
+              onPress={appendNumberType('survey')}
+              selected={state.spamList.includes('survey')}
+              selectedColor="#00A88E">
               Nhá máy
             </Chip>
           </View>
@@ -120,7 +127,7 @@ const AddNumbers = () => {
         buttonColor="#00A88E"
         style={{borderRadius: 8}}
         icon={() => <AntDesign name="search1" size={20} color="white" />}>
-        <Text style={{color: 'white'}}>Kiểm tra</Text>
+        <Text style={{color: 'white'}}>Thêm vào danh sách </Text>
       </Button>
     </View>
   );
@@ -133,6 +140,8 @@ const createStyles = () => {
     container: {
       padding: 16,
       gap: 16,
+      // alignItems: 'center',
+      // justifyContent: 'center',
     },
     image: {
       width: 200,
@@ -147,5 +156,8 @@ const createStyles = () => {
       borderRadius: 8,
     },
     label: {textAlign: 'center', color: 'white'},
+    titleContainer: {
+      alignItems: 'center',
+    },
   });
 };
