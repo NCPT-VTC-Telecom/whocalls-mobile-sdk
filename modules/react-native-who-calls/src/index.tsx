@@ -51,6 +51,7 @@ export const checkNumber = (
   });
 };
 
+/** Updating the database set */
 export const updateDatabase = (): Promise<any> => {
   const {WhoCallSDK} = NativeModules;
 
@@ -70,4 +71,53 @@ export const updateDatabase = (): Promise<any> => {
   });
 };
 
-export default {onCreate, checkNumber, updateDatabase};
+/** Report spam number */
+export const reportSpamNumber = (
+  number: string,
+  isSpam?: boolean,
+  comments?: string | null,
+): Promise<any> => {
+  const {WhoCallSDK} = NativeModules;
+
+  return new Promise((resolve, reject) => {
+    let result: EmitterSubscription;
+    result = DeviceEventEmitter.addListener('Status', data => {
+      resolve(data);
+      result.remove();
+    });
+
+    try {
+      WhoCallSDK.reportSpam(number, isSpam, comments);
+    } catch (error) {
+      console.log(error);
+      reject(error);
+    }
+  });
+};
+
+export const getPhoneNumberInformation = (number: string): Promise<any> => {
+  const {WhoCallSDK} = NativeModules;
+
+  return new Promise((resolve, reject) => {
+    let result: EmitterSubscription;
+    result = DeviceEventEmitter.addListener('Status', data => {
+      resolve(data);
+      result.remove();
+    });
+
+    try {
+      WhoCallSDK.getPhoneInformation(number);
+    } catch (error) {
+      console.log(error);
+      reject(error);
+    }
+  });
+};
+
+export default {
+  onCreate,
+  checkNumber,
+  updateDatabase,
+  reportSpamNumber,
+  getPhoneNumberInformation,
+};

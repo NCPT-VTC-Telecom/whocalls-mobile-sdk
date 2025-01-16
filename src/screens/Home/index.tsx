@@ -103,6 +103,15 @@ const CheckInformation = () => {
     }
   };
 
+  const getPhoneInformation = async () => {
+    try {
+      const result = await WhoCallsSDK.getPhoneNumberInformation(state.text);
+      console.log('result', result);
+    } catch (error) {
+      console.log('error', error);
+    }
+  };
+
   const onChangeType = (value: 'phone' | 'email') => () => {
     setState(s => ({...s, text: '', type: value}));
   };
@@ -161,7 +170,8 @@ const CheckInformation = () => {
         </Button>
         <Button
           mode="contained"
-          onPress={checkNumber('local')}
+          // onPress={checkNumber('local')}
+          onPress={getPhoneInformation}
           buttonColor="#00A88E"
           style={{borderRadius: 8, flex: 1}}
           icon={() => <AntDesign name="search1" size={20} color="white" />}

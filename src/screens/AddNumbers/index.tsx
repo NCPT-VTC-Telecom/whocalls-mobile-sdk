@@ -1,16 +1,21 @@
-import {View, Image, StyleSheet, TouchableOpacity, Alert} from 'react-native';
+import {View, Image, StyleSheet, KeyboardAvoidingView} from 'react-native';
 import React from 'react';
 import {images} from '../../assets';
 import Text from '../../components/Text';
 import {Button, Chip, Switch, TextInput} from 'react-native-paper';
 import {isPhoneNumber} from '../../helpers';
 
+import WhoCalls from 'react-native-who-calls';
+
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import Toast from 'react-native-toast-message';
 
 interface IState {
   text: string;
   type: boolean;
-  spamList: string[];
+
+  comments: string;
 }
 
 const AddNumbers = () => {
@@ -18,7 +23,7 @@ const AddNumbers = () => {
   const [state, setState] = React.useState<IState>({
     text: '',
     type: false,
-    spamList: [],
+    comments: '',
   });
 
   const onChangeText = (value: string) => {
@@ -29,31 +34,41 @@ const AddNumbers = () => {
     setState(s => ({...s, type: !s.type, spamList: []}));
   };
 
-  const appendNumberType = (value: string) => () => {
-    setState(s => ({...s, spamList: [...s.spamList, value]}));
+  const onChangeComments = (value: string) => {
+    setState(s => ({...s, comments: value}));
   };
 
-  const removeType = (value: string) => () => {
-    setState(s => ({
-      ...s,
-      spamList: s.spamList.filter(item => item !== value),
-    }));
+  const handleAddSpam = async () => {
+    try {
+      await WhoCalls.reportSpamNumber(state.text, state.type, state.comments);
+      Toast.show({
+        type: 'success',
+        text1: 'Thành công',
+        text2: 'Thêm thành công',
+      });
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: 'Lỗi',
+        text2: 'Thêm số điện thoại thất bại',
+      });
+    }
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAwareScrollView style={styles.container}>
       <View style={styles.titleContainer}>
         <Image source={images.logo} style={styles.image} />
         <Text style={styles.title} variant="h2">
           Thêm số điện thoại
         </Text>
-        <Text>
+        <Text style={{textAlign: 'center', color: 'gray'}}>
           Hãy nhập vào số điện thoại để có thể thêm thông tin số điện thoại
         </Text>
       </View>
 
       <TextInput
-        style={{backgroundColor: 'white'}}
+        style={{backgroundColor: 'white', marginTop: 16}}
         placeholder={'Nhập số điện thoại'}
         placeholderTextColor={'lightgray'}
         keyboardType={'number-pad'}
@@ -70,66 +85,38 @@ const AddNumbers = () => {
           flexDirection: 'row',
           justifyContent: 'center',
           alignItems: 'center',
+          marginVertical: 16,
         }}>
         <Text style={{flex: 1}}>Có phải hạng mục rác?</Text>
         <Switch value={state.type} onChange={onChangeType} />
       </View>
 
       {state?.type === true && (
-        <View style={{gap: 8}}>
+        <KeyboardAvoidingView style={{gap: 8, flex: 1}}>
           <Text style={{fontWeight: '700', fontSize: 15}}>
-            Số điện thoại này thuộc hạng mục nào
+            Thêm thông tin cho hạng mục spam hoặc rác
           </Text>
           <View style={{flexWrap: 'wrap', flexDirection: 'row', gap: 8}}>
-            <Chip
-              icon="check"
-              onPress={appendNumberType('spam')}
-              selected={state.spamList.includes('spam')}
-              selectedColor={'#00A88E'}>
-              Cuộc gọi rác
-            </Chip>
-            <Chip
-              icon="check"
-              onPress={appendNumberType('ad')}
-              selected={state.spamList.includes('ad')}
-              selectedColor="#00A88E"
-              onLongPress={removeType('ad')}>
-              Quảng cáo
-            </Chip>
-            <Chip
-              icon="check"
-              onPress={appendNumberType('scam')}
-              selected={state.spamList.includes('scam')}
-              selectedColor="#00A88E">
-              Lừa đảo
-            </Chip>
-            <Chip
-              icon="check"
-              onPress={appendNumberType('harass')}
-              selected={state.spamList.includes('harass')}
-              selectedColor="#00A88E">
-              Làm phiền
-            </Chip>
-            <Chip
-              icon="check"
-              onPress={appendNumberType('survey')}
-              selected={state.spamList.includes('survey')}
-              selectedColor="#00A88E">
-              Nhá máy
-            </Chip>
+            <TextInput
+              value={state?.comments}
+              onChangeText={onChangeComments}
+              style={{height: 100, backgroundColor: 'white', flex: 1}}
+              multiline
+              placeholder={'Nhập thông tin'}
+            />
           </View>
-        </View>
+        </KeyboardAvoidingView>
       )}
       <Button
         mode="contained"
-        onPress={() => {}}
+        onPress={handleAddSpam}
         rippleColor={'lightgray'}
         buttonColor="#00A88E"
-        style={{borderRadius: 8}}
+        style={{borderRadius: 8, marginVertical: 16}}
         icon={() => <AntDesign name="search1" size={20} color="white" />}>
         <Text style={{color: 'white'}}>Thêm vào danh sách </Text>
       </Button>
-    </View>
+    </KeyboardAwareScrollView>
   );
 };
 
@@ -147,7 +134,7 @@ const createStyles = () => {
       width: 200,
       height: 200,
     },
-    title: {fontSize: 25, fontWeight: '500'},
+    title: {fontSize: 25, fontWeight: '700'},
     button: {
       flex: 1,
       justifyContent: 'center',

@@ -7,6 +7,8 @@ import {
 } from 'react-native';
 import React from 'react';
 
+import Toast from 'react-native-toast-message';
+
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
 import {Avatar} from '@rneui/themed';
@@ -16,9 +18,35 @@ import {color} from '@rneui/base';
 import Text from '../../components/Text';
 import {StackScreenProps} from '@react-navigation/stack';
 
+import WhoCallsSDK from 'react-native-who-calls';
+
 const Settings: React.FC<StackScreenProps<any>> = ({navigation}) => {
+  const [loading, setLoading] = React.useState<boolean>(false);
+
   const onPremium = () => {
     Alert.alert('Nâng cấp Premium', 'Bạn có muốn nâng cấp Premium không?');
+  };
+
+  const updateDatabase = async () => {
+    try {
+      setLoading(true);
+      const response = await WhoCallsSDK.updateDatabase();
+      console.log(response);
+      setLoading(false);
+
+      Toast.show({
+        text1: 'Thành công',
+        text2: 'Cập nhật cơ sở dữ liệu thành công',
+        type: 'success',
+      });
+    } catch (error) {
+      Toast.show({
+        text1: 'Lỗi',
+        text2: 'Không thể cập nhật cơ sở dữ liệu',
+        type: 'error',
+      });
+      setLoading(false);
+    }
   };
 
   const DATA_ROUTING = [
@@ -26,6 +54,7 @@ const Settings: React.FC<StackScreenProps<any>> = ({navigation}) => {
       name: 'Cập nhật cơ sở dữ liệu',
       icon: 'database',
       color: '#BA3F1D',
+      onPress: updateDatabase,
     },
     {
       name: 'Nâng cấp Premium',

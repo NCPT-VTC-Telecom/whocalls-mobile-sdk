@@ -3,6 +3,8 @@ import React from 'react';
 import {name as appName} from './app.json';
 import {AppRegistry} from 'react-native';
 
+import Toast from 'react-native-toast-message';
+
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 
 import {NavigationContainer} from '@react-navigation/native';
@@ -48,6 +50,7 @@ function App(): React.JSX.Element {
           ))}
         </Stack.Navigator>
       </NavigationContainer>
+      <Toast />
     </SafeAreaProvider>
   );
 }
