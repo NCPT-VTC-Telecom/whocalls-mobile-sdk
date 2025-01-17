@@ -17,10 +17,8 @@ import com.kaspersky.whocalls.externalapi.CustomPhoneInfo;
 import com.kaspersky.whocalls.externalapi.CustomPhoneInfoBuilder;
 import com.kaspersky.whocalls.externalapi.DatabasePhoneInfo;
 import com.kaspersky.whocalls.externalapi.DatabasePhoneInfoException;
-import com.kaspersky.whocalls.externalapi.OfflineBasesUpdateResult;
 import com.kaspersky.whocalls.externalapi.PhoneNumber;
 import com.kaspersky.whocalls.externalapi.PhoneNumberBuilder;
-import com.kaspersky.whocalls.externalapi.UpdateListener;
 import com.kaspersky.whocalls.externalapi.WhoCallsSdkException;
 import com.kaspersky.whocalls.externalapi.WhoCallsSdkFactory;
 import com.kaspersky.whocalls.externalapi.WhoCallsSdkInitParams;
@@ -38,14 +36,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
 
-import whocallssdk.MainActivityCallback;
-import whocallssdk.SdkInitListener;
-
 
 public class WhoCallsModule extends ReactContextBaseJavaModule {
 
+
   public String TAG = "WhoCalls Started";
-  private volatile InitStatus mSdkInitStatus = InitStatus.NotInited;
+
 
   public WhoCallsModule(ReactApplicationContext reactContext) {
     super(reactContext);
@@ -56,54 +52,42 @@ public class WhoCallsModule extends ReactContextBaseJavaModule {
     return "WhoCallSDK";
   }
 
-
   /**
    * Create and intitalize the SDK to function properly
    **/
   @ReactMethod
   public void onCreate() {
-
-    MainActivityCallback listener;
-    new Thread(new Runnable() {
-      @Override
-      public void run() {
-        initializeSdk();
-      }
-    }).start();
+    new Thread(() -> initializeSdk()).start();
   }
 
   /**
    * Initialize SDK for using the WhoCalls
    */
   private void initializeSdk() {
-    SdkInitListener listener = null;
-    Log.i(TAG, "SDK initialization started");
-    final File basesPath = getCurrentActivity().getDir("bases", Context.MODE_PRIVATE);
 
+
+    final File basesPath = Objects.requireNonNull(getCurrentActivity()).getApplicationContext()
+            .getDir("bases", Context.MODE_PRIVATE);
+//    SdkInitListener listener = (SdkInitListener) getCurrentActivity();
     if (KavSdk.isInitialized()) {
-      listener.log("SDK already initialized");
+//      listener.log("SDK already initialized");
       return;
     }
 
 
-    MainActivityCallback mExtListener = (MainActivityCallback) listener;
+    Context context = Objects.requireNonNull(getCurrentActivity()).getApplicationContext();
+    WhoCallsSdkInitParams params = new WhoCallsSdkInitParamsBuilder(basesPath).build();
+
+//    MainActivityCallback mExtListener = (MainActivityCallback) listener;
     try {
-      WhoCallsSdkInitParams params = new WhoCallsSdkInitParamsBuilder(basesPath)
-              //.setForegroundRequest(foregroundRequest)
-              .build();
+
       WhoCallsSdkManager whoCallsSdk = WhoCallsSdkFactory.getWhoCallsSdkManager();
-      if (whoCallsSdk == null) {
-        whoCallsSdk = WhoCallsSdkFactory.initializeWhoCallsSdk(getCurrentActivity().getApplicationContext(), params);
-      }
+      if (whoCallsSdk == null)
 
-
+        whoCallsSdk = WhoCallsSdkFactory.initializeWhoCallsSdk(context, params);
+      // Check if the license is valid
       SdkLicense license = WhoCallsSdkFactory.getLicense();
-
-      if (!license.isValid()) {
-
-        license.activate(null);
-      }
-      Log.d(TAG, String.valueOf(license.isValid()));
+      if (!license.isValid()) license.activate(null);
       Updater updater = Updater.getInstance();
       updater.updateAllBases((i, i1) -> false);
 
@@ -123,7 +107,7 @@ public class WhoCallsModule extends ReactContextBaseJavaModule {
       Log.d(TAG, e.getMessage());
     }
 
-//    listener.onSdkInitialized();
+
     Log.i(TAG, "SDK initialization succeeded");
   }
 
@@ -133,40 +117,32 @@ public class WhoCallsModule extends ReactContextBaseJavaModule {
   @ReactMethod
   @SuppressLint("MissingPermission")
   private void checkPhoneNumber(String number, String type) throws WhoCallsSdkException, SdkLicenseViolationException {
-    final File basesPath = Objects.requireNonNull(getCurrentActivity()).getApplicationContext().getDir("bases", Context.MODE_PRIVATE);
-
-    /** Initialize the SDK */
-    WhoCallsSdkInitParams params = new WhoCallsSdkInitParamsBuilder(basesPath)
-            .build();
+    ReactContext rContext = getReactApplicationContext();
+    Updater updater = Updater.getInstance();
     WhoCallsSdkManager whoCallsSdk = WhoCallsSdkFactory.getWhoCallsSdkManager();
-    if (whoCallsSdk == null) {
-      WhoCallsSdkFactory.initializeWhoCallsSdk(getCurrentActivity().getApplicationContext(), params);
-    }
-    WhoCallsSdkManager whoCallsSdkManager = WhoCallsSdkFactory.getWhoCallsSdkManager();
+    Context context = Objects.requireNonNull(getCurrentActivity()).getApplicationContext();
+    final File basesPath = Objects.requireNonNull(getCurrentActivity()).getApplicationContext()
+            .getDir("bases", Context.MODE_PRIVATE);
+    WhoCallsSdkInitParams params = new WhoCallsSdkInitParamsBuilder(basesPath).build();
+    /** Initialize the SDK */
+    if (whoCallsSdk == null) WhoCallsSdkFactory.initializeWhoCallsSdk(context, params);
 
     /** Update the SDK Database*/
-    Updater updater = Updater.getInstance();
     updater.updateAllBases((i, i1) -> false);
     Log.d(TAG, "In check number");
-    whoCallsSdkManager.updateOfflineBases(new UpdateListener() {
-      @Override
-      public void onResult(OfflineBasesUpdateResult offlineBasesUpdateResult) {
-        Log.d(TAG, offlineBasesUpdateResult.toString());
-      }
-    });
+    whoCallsSdk.updateOfflineBases(offlineBasesUpdateResult -> Log.d(TAG, offlineBasesUpdateResult.toString()));
     /** Checking the phone reputation */
     PhoneNumber phoneNumber = new PhoneNumberBuilder().setE164PhoneNumber(number).build();
     DatabasePhoneInfo info;
     if (Objects.equals(type, "cloud"))
       try {
-        info = whoCallsSdkManager.requestPhoneNumberInfoFromCloud(phoneNumber);
+        info = whoCallsSdk.requestPhoneNumberInfoFromCloud(phoneNumber);
         Log.d(TAG, "Info cloud: " + info);
       } catch (DatabasePhoneInfoException e) {
         e.printStackTrace();
       }
     else {
-
-      info = (DatabasePhoneInfo) whoCallsSdkManager.requestPhoneBookInfo(phoneNumber);
+      info = (DatabasePhoneInfo) whoCallsSdk.requestPhoneBookInfo(phoneNumber);
       Log.d(TAG, "Info local: " + info.getSource().name());
     }
   }
@@ -174,25 +150,21 @@ public class WhoCallsModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   private void addNumbersInfo(String number) throws WhoCallsSdkException, SdkLicenseViolationException {
-    final File basesPath = Objects.requireNonNull(getCurrentActivity()).getApplicationContext().getDir("bases", Context.MODE_PRIVATE);
-    /** Initialize the SDK */
-    WhoCallsSdkInitParams params = new WhoCallsSdkInitParamsBuilder(basesPath)
-            .build();
-    WhoCallsSdkManager whoCallsSdk = WhoCallsSdkFactory.getWhoCallsSdkManager();
-    if (whoCallsSdk == null) {
-      WhoCallsSdkFactory.initializeWhoCallsSdk(Objects.requireNonNull(getCurrentActivity()).getApplicationContext(), params);
-    }
-    WhoCallsSdkManager whoCallsSdkManager = WhoCallsSdkFactory.getWhoCallsSdkManager();
-    /** Update the SDK Database*/
+    ReactContext rContext = getReactApplicationContext();
     Updater updater = Updater.getInstance();
+    WhoCallsSdkManager whoCallsSdk = WhoCallsSdkFactory.getWhoCallsSdkManager();
+    Context context = Objects.requireNonNull(getCurrentActivity()).getApplicationContext();
+    /** Initialize the SDK */
+    final File basesPath = Objects.requireNonNull(getCurrentActivity()).getApplicationContext()
+            .getDir("bases", Context.MODE_PRIVATE);
+    WhoCallsSdkInitParams params = new WhoCallsSdkInitParamsBuilder(basesPath).build();
+    if (whoCallsSdk == null) WhoCallsSdkFactory.initializeWhoCallsSdk(context, params);
+
+
+    /** Update the SDK Database*/
     updater.updateAllBases((i, i1) -> false);
     Log.d(TAG, "In check number");
-    whoCallsSdkManager.updateOfflineBases(new UpdateListener() {
-      @Override
-      public void onResult(OfflineBasesUpdateResult offlineBasesUpdateResult) {
-        Log.d(TAG, offlineBasesUpdateResult.toString());
-      }
-    });
+    whoCallsSdk.updateOfflineBases(offlineBasesUpdateResult -> Log.d(TAG, offlineBasesUpdateResult.toString()));
     PhoneNumber phoneNumber = new PhoneNumberBuilder().setE164PhoneNumber(number).build();
 //    whoCallsSdkManager.getCustomNumberListManager().addOrUpdateCustomPhoneInfo(phoneNumber, info);
 
@@ -200,76 +172,68 @@ public class WhoCallsModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   private void updateDatabase() throws SdkLicenseViolationException, WhoCallsSdkException {
-    final File basesPath = Objects.requireNonNull(getCurrentActivity()).getApplicationContext().getDir("bases", Context.MODE_PRIVATE);
-    WhoCallsSdkInitParams params = new WhoCallsSdkInitParamsBuilder(basesPath)
-            .build();
-    WhoCallsSdkManager whoCallsSdk = WhoCallsSdkFactory.getWhoCallsSdkManager();
-    if (whoCallsSdk == null) {
-      WhoCallsSdkFactory.initializeWhoCallsSdk(Objects.requireNonNull(getCurrentActivity()).getApplicationContext(), params);
-    }
-    WhoCallsSdkManager whoCallsSdkManager = WhoCallsSdkFactory.getWhoCallsSdkManager();
+    ReactContext rContext = getReactApplicationContext();
     Updater updater = Updater.getInstance();
+    WhoCallsSdkManager whoCallsSdk = WhoCallsSdkFactory.getWhoCallsSdkManager();
+    Context context = Objects.requireNonNull(getCurrentActivity()).getApplicationContext();
+    final File basesPath = Objects.requireNonNull(getCurrentActivity()).getApplicationContext()
+            .getDir("bases", Context.MODE_PRIVATE);
+    WhoCallsSdkInitParams params = new WhoCallsSdkInitParamsBuilder(basesPath).build();
+    if (whoCallsSdk == null)
+      WhoCallsSdkFactory.initializeWhoCallsSdk(context, params);
+
     updater.updateAllBases((i, i1) -> false);
     Log.d(TAG, "In check number");
-    sendEvent(getReactApplicationContext(), "updateStatus", "true");
-    whoCallsSdkManager.updateOfflineBases(new UpdateListener() {
-      @Override
-      public void onResult(OfflineBasesUpdateResult offlineBasesUpdateResult) {
-
-        Log.d(TAG, offlineBasesUpdateResult.toString());
-      }
-    });
+    sendEvent(rContext, "updateStatus", "true");
+    whoCallsSdk.updateOfflineBases(offlineBasesUpdateResult -> Log.d(TAG, offlineBasesUpdateResult.toString()));
   }
 
   @ReactMethod
   private void reportSpam(String number, Boolean isSpam, @Nullable String comment)
           throws SdkLicenseViolationException, WhoCallsSdkException {
-    Log.d(TAG, "The text from params are: " + number + isSpam + comment);
+    ReactContext rContext = getReactApplicationContext();
+    Updater updater = Updater.getInstance();
+    WhoCallsSdkManager whoCallsSdk = WhoCallsSdkFactory.getWhoCallsSdkManager();
+    Context context = Objects.requireNonNull(getCurrentActivity()).getApplicationContext();
     final File basesPath = Objects.requireNonNull(getCurrentActivity()).getApplicationContext()
             .getDir("bases", Context.MODE_PRIVATE);
-    WhoCallsSdkInitParams params =
-            new WhoCallsSdkInitParamsBuilder(basesPath)
-                    .build();
-    WhoCallsSdkManager whoCallsSdk =
-            WhoCallsSdkFactory.getWhoCallsSdkManager();
-    if (whoCallsSdk == null) {
-      WhoCallsSdkFactory.initializeWhoCallsSdk(
-              Objects.requireNonNull(getCurrentActivity()).getApplicationContext(), params);
-    }
-    WhoCallsSdkManager whoCallsSdkManager = WhoCallsSdkFactory.getWhoCallsSdkManager();
+    Log.d(TAG, "The text from params are: " + number + isSpam + comment);
+    WhoCallsSdkInitParams params = new WhoCallsSdkInitParamsBuilder(basesPath).build();
 
-    Updater updater = Updater.getInstance();
+    if (whoCallsSdk == null) {
+      WhoCallsSdkFactory.initializeWhoCallsSdk(context, params);
+    }
+
+
     updater.updateAllBases((i, i1) -> false);
     Log.d(TAG, "In check number");
-    sendEvent(getReactApplicationContext(), "updateStatus", "true");
-    whoCallsSdkManager.updateOfflineBases(offlineBasesUpdateResult -> Log.d(TAG, offlineBasesUpdateResult.toString()));
+    sendEvent(rContext, "updateStatus", "true");
+    whoCallsSdk.updateOfflineBases(offlineBasesUpdateResult -> Log.d(TAG, offlineBasesUpdateResult.toString()));
 
     assert comment != null;
     if (comment.length() > 1000) {
-
-      sendEvent(getReactApplicationContext(), "Status", "false");
+      sendEvent(rContext, "Status", "false");
       return;
     }
     /** Adding the number to the report section*/
     PhoneNumber phoneNumber = new PhoneNumberBuilder().setE164PhoneNumber(number).build();
-    whoCallsSdkManager.reportNumber(phoneNumber, isSpam, comment);
-    sendEvent(getReactApplicationContext(), "Status", "true");
+    whoCallsSdk.reportNumber(phoneNumber, isSpam, comment);
+    sendEvent(rContext, "Status", "true");
   }
 
   @ReactMethod
-  private void getPhoneInformation(String number) throws SdkLicenseViolationException, WhoCallsSdkException {
+  private void getPhoneInformation(String number) throws WhoCallsSdkException {
+    ReactContext rContext = getReactApplicationContext();
+    Updater updater = Updater.getInstance();
+    WhoCallsSdkManager whoCallsSdk = WhoCallsSdkFactory.getWhoCallsSdkManager();
+    Context context = Objects.requireNonNull(getCurrentActivity()).getApplicationContext();
     final File basesPath = Objects.requireNonNull(getCurrentActivity()).getApplicationContext()
             .getDir("bases", Context.MODE_PRIVATE);
-    WhoCallsSdkInitParams params =
-            new WhoCallsSdkInitParamsBuilder(basesPath)
-                    .build();
-    WhoCallsSdkManager whoCallsSdk =
-            WhoCallsSdkFactory.getWhoCallsSdkManager();
-    if (whoCallsSdk == null) {
-      WhoCallsSdkFactory.initializeWhoCallsSdk(
-              Objects.requireNonNull(getCurrentActivity()).getApplicationContext(), params);
-    }
-    WhoCallsSdkManager whoCallsSdkManager = WhoCallsSdkFactory.getWhoCallsSdkManager();
+    WhoCallsSdkInitParams params = new WhoCallsSdkInitParamsBuilder(basesPath).build();
+
+    if (whoCallsSdk == null)
+      WhoCallsSdkFactory.initializeWhoCallsSdk(context, params);
+
     PhoneNumber testPhoneNumber = new PhoneNumberBuilder()
             .setE164PhoneNumber(number)
             .build();
@@ -278,37 +242,20 @@ public class WhoCallsModule extends ReactContextBaseJavaModule {
             .addCategory("My category") // Actually, any String, too
             .build();
 
-    CustomNumberListManager cnlm = whoCallsSdkManager.getCustomNumberListManager();
+    CustomNumberListManager cnlm = whoCallsSdk.getCustomNumberListManager();
     cnlm.addOrUpdateCustomPhoneInfo(testPhoneNumber, info);
 
     //Both(!) will return custom DB information about the number
-//      whoCallsSdkManager.requestPhoneNumberInfoFromCloud(testPhoneNumber);
-    whoCallsSdkManager.requestPhoneNumberInfoFromOfflineDatabase(testPhoneNumber);
+    // whoCallsSdk.requestPhoneNumberInfoFromCloud(testPhoneNumber);
+    whoCallsSdk.requestPhoneNumberInfoFromOfflineDatabase(testPhoneNumber);
   }
 
-
-  private void onInitializationFailed(InitStatus initStatus, String s) {
-  }
 
   private void sendEvent(ReactContext reactContext, String eventName, @Nullable String message) {
     reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
             .emit(eventName, message);
   }
 
-  private enum InitStatus {
-    NotInited,
-    InitInProgress,
-    InitedSuccesfully,
-    InsufficientPermissions,
-    NeedNewLicenseCode,
-    InitAntivirusFailed,
-    InitFailed;
 
-    public static boolean isError(InitStatus initStatus) {
-      return initStatus != NotInited &&
-              initStatus != InitInProgress &&
-              initStatus != InitedSuccesfully;
-    }
-  }
 }
 

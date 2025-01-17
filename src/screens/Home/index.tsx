@@ -17,6 +17,7 @@ import {isEmail, isPhoneNumber} from '../../helpers';
 import WhoCallsSDK from 'react-native-who-calls';
 
 import AntDesign from 'react-native-vector-icons/AntDesign';
+import Information from './Information';
 
 interface IState {
   text: string;
@@ -116,6 +117,10 @@ const CheckInformation = () => {
     setState(s => ({...s, text: '', type: value}));
   };
 
+  const onCheckInformation = () => {
+    return <Information isVisible={true} />;
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
@@ -129,7 +134,6 @@ const CheckInformation = () => {
             : 'Hãy nhập vào email để có thể kiểm tra thông tin email'}
         </Text>
       </View>
-
       <TextInput
         style={{backgroundColor: 'white'}}
         placeholder={
@@ -192,6 +196,7 @@ const CheckInformation = () => {
             : 'Kiểm tra thông tin số điện thoại '}
         </Text>
       </TouchableOpacity>
+      <Information />;
     </View>
   );
 };
