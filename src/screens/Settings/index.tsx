@@ -12,8 +12,6 @@ import Toast from 'react-native-toast-message';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
 import {Avatar} from '@rneui/themed';
-import OptionsList from './Options';
-import {color} from '@rneui/base';
 
 import Text from '../../components/Text';
 import {StackScreenProps} from '@react-navigation/stack';
@@ -111,7 +109,6 @@ const Settings: React.FC<StackScreenProps<any>> = ({navigation}) => {
             flex: 1,
             justifyContent: 'flex-end',
             alignItems: 'flex-end',
-            backgroundColor: 'lightblue',
             paddingHorizontal: 8,
             borderRadius: 8,
           }}>
@@ -130,23 +127,14 @@ const Settings: React.FC<StackScreenProps<any>> = ({navigation}) => {
 export default Settings;
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 8,
-    flex: 1,
-    // flexDirection: 'row',
-    // alignItems: 'center',
-  },
+  container: {adding: 8, flex: 1},
   touchSettings: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 12,
     marginHorizontal: 8,
-    // flex: 1,
     paddingHorizontal: 12,
     gap: 8,
-
-    // justifyContent: 'center',
-    // borderBottomWidth: 1,
     backgroundColor: 'white',
     borderRadius: 8,
     marginVertical: 4,

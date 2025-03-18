@@ -1,5 +1,4 @@
 import {
-  FlatList,
   Linking,
   ScrollView,
   StyleSheet,
@@ -130,7 +129,6 @@ const Information: React.FC<Interface> = ({
             <View
               style={{
                 flexDirection: 'row',
-                // height: 100,
                 justifyContent: 'space-between',
               }}>
               <Text style={styles.description}>Mô tả</Text>

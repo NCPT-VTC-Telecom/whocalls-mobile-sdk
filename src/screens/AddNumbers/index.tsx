@@ -2,7 +2,8 @@ import {View, Image, StyleSheet, KeyboardAvoidingView} from 'react-native';
 import React from 'react';
 import {images} from '../../assets';
 import Text from '../../components/Text';
-import {Button, Chip, Switch, TextInput} from 'react-native-paper';
+import {Chip, Switch, TextInput} from 'react-native-paper';
+import {Button} from '@rneui/themed';
 import {isPhoneNumber} from '../../helpers';
 
 import WhoCalls from 'react-native-who-calls';
@@ -108,14 +109,10 @@ const AddNumbers = () => {
         </KeyboardAvoidingView>
       )}
       <Button
-        mode="contained"
         onPress={handleAddSpam}
-        rippleColor={'lightgray'}
-        buttonColor="#00A88E"
-        style={{borderRadius: 8, marginVertical: 16}}
-        icon={() => <AntDesign name="search1" size={20} color="white" />}>
-        <Text style={{color: 'white'}}>Thêm vào danh sách </Text>
-      </Button>
+        containerStyle={{marginVertical: 16}}
+        title={'Thêm vào danh sách'}
+      />
     </KeyboardAwareScrollView>
   );
 };

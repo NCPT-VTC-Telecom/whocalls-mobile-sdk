@@ -11,7 +11,8 @@ import {PERMISSIONS, RESULTS, check, request} from 'react-native-permissions';
 import React from 'react';
 import {images} from '../../assets';
 import Text from '../../components/Text';
-import {Button, TextInput} from 'react-native-paper';
+import {TextInput} from 'react-native-paper';
+import {Button} from '@rneui/themed';
 import {isEmail, isPhoneNumber} from '../../helpers';
 
 import WhoCallsSDK from 'react-native-who-calls';
@@ -160,11 +161,8 @@ const CheckInformation = () => {
       )}
       <View style={{flexDirection: 'row', gap: 8}}>
         <Button
-          mode="contained"
           onPress={checkNumber('cloud')}
-          buttonColor="#00A88E"
           style={{borderRadius: 8, flex: 1}}
-          icon={() => <AntDesign name="cloud" size={20} color="white" />}
           disabled={
             !state.text ||
             (state.type === 'phone' && !isPhoneNumber(state.text)) ||
@@ -173,12 +171,9 @@ const CheckInformation = () => {
           <Text style={{color: 'white'}}>Kiểm tra Cloud</Text>
         </Button>
         <Button
-          mode="contained"
           // onPress={checkNumber('local')}
           onPress={getPhoneInformation}
-          buttonColor="#00A88E"
           style={{borderRadius: 8, flex: 1}}
-          icon={() => <AntDesign name="search1" size={20} color="white" />}
           disabled={
             !state.text ||
             (state.type === 'phone' && !isPhoneNumber(state.text)) ||

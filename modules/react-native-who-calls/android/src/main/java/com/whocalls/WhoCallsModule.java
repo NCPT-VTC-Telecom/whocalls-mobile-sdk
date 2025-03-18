@@ -38,11 +38,7 @@ import java.util.Objects;
 
 
 public class WhoCallsModule extends ReactContextBaseJavaModule {
-
-
   public String TAG = "WhoCalls Started";
-
-
   public WhoCallsModule(ReactApplicationContext reactContext) {
     super(reactContext);
   }
@@ -52,29 +48,17 @@ public class WhoCallsModule extends ReactContextBaseJavaModule {
     return "WhoCallSDK";
   }
 
-  /**
-   * Create and intitalize the SDK to function properly
-   **/
   @ReactMethod
   public void onCreate() {
     new Thread(() -> initializeSdk()).start();
   }
-
-  /**
-   * Initialize SDK for using the WhoCalls
-   */
   private void initializeSdk() {
-
-
     final File basesPath = Objects.requireNonNull(getCurrentActivity()).getApplicationContext()
             .getDir("bases", Context.MODE_PRIVATE);
-//    SdkInitListener listener = (SdkInitListener) getCurrentActivity();
-    if (KavSdk.isInitialized()) {
-//      listener.log("SDK already initialized");
+    // SdkInitListener listener = (SdkInitListener) getCurrentActivity();
+    if (KavSdk.isInitialized()) {// listener.log("SDK already initialized");
       return;
     }
-
-
     Context context = Objects.requireNonNull(getCurrentActivity()).getApplicationContext();
     WhoCallsSdkInitParams params = new WhoCallsSdkInitParamsBuilder(basesPath).build();
 
