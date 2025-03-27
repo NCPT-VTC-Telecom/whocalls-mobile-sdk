@@ -1,25 +1,21 @@
+import React from 'react';
 import {
   ActivityIndicator,
   Alert,
   FlatList,
   StyleSheet,
   View,
+  TouchableOpacity,
 } from 'react-native';
-import React from 'react';
-
+import {Tab, TabView} from '@rneui/themed';
 import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
-
 import Contacts from 'react-native-contacts';
-import {Avatar} from '@rneui/base';
-import Item from './Item';
-import {Input} from '@rneui/themed';
-
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import {SheetManager} from 'react-native-actions-sheet';
+import {Input} from '@rneui/themed';
+import Text from '../../components/Text';
 import EmptyComponents from '../../components/Empty';
 import Loading from '../../components/Loading';
-
-import Text from '../../components/Text';
+import Item from './Item';
 
 const ContactsList = () => {
   const styles = createStyles();
@@ -27,12 +23,13 @@ const ContactsList = () => {
   const [permissionStatus, setPermissionStatus] = React.useState(null);
   const [listContacts, setListContacts] = React.useState<any>([]);
   const [loading, setLoading] = React.useState(false);
+  const [selectedTab, setSelectedTab] = React.useState(0);
 
   React.useEffect(() => {
     checkContactsPermission();
-    console.log('permissionStatus', permissionStatus);
     if (permissionStatus === RESULTS.GRANTED) getContact();
-  }, []);
+  }, [permissionStatus]);
+
   const checkContactsPermission = async () => {
     try {
       const status: any = await check(PERMISSIONS.ANDROID.READ_CONTACTS);
@@ -63,6 +60,7 @@ const ContactsList = () => {
       console.error('Permission request error:', error);
     }
   };
+
   const getContact = async () => {
     try {
       setLoading(true);
@@ -74,18 +72,17 @@ const ContactsList = () => {
     }
   };
 
-  console.log('listContacts', listContacts);
-
-  const renderItemSeparator = () => {
-    return (
-      <View
-        style={{
-          borderWidth: 0.25,
-          marginHorizontal: 8,
-          borderColor: 'gray',
-        }}
-      />
-    );
+  const filterContacts = (type: string) => {
+    if (type === 'trust') {
+      return listContacts.filter((contact: any) =>
+        contact.name?.toLowerCase().includes('trust'),
+      );
+    } else if (type === 'spam') {
+      return listContacts.filter((contact: any) =>
+        contact.name?.toLowerCase().includes('spam'),
+      );
+    }
+    return listContacts;
   };
 
   const renderItem = (item: any) => {
@@ -96,23 +93,31 @@ const ContactsList = () => {
     return <EmptyComponents onPress={getContact} />;
   };
 
-  const renderEndReached = () => {
+  const renderHeader = () => {
+    const trustedContacts = filterContacts('trust');
     return (
-      <View>
-        <Text>Đã hết danh bạ của bạn </Text>
+      <View style={styles.headerContainer}>
+        <Text style={styles.headerTitle}>Trusted Numbers</Text>
+        {trustedContacts.length > 0 ? (
+          <FlatList
+            data={trustedContacts}
+            keyExtractor={(item: any) => item.recordID}
+            renderItem={({item}) => (
+              <Text style={styles.trustedContact}>{item.name}</Text>
+            )}
+          />
+        ) : (
+          <Text style={styles.noTrustedContacts}>
+            No trusted contacts found
+          </Text>
+        )}
       </View>
     );
   };
 
   if (loading)
     return (
-      <View
-        style={{
-          justifyContent: 'center',
-          alignItems: 'center',
-          flex: 1,
-          gap: 8,
-        }}>
+      <View style={styles.loadingContainer}>
         <ActivityIndicator size={50} />
         <Text style={{textAlign: 'center'}}>
           Đang tải dữ liệu, vui lòng đợi
@@ -122,39 +127,48 @@ const ContactsList = () => {
 
   return (
     <View style={styles.container}>
+      {renderHeader()}
       <Input
         style={styles.input}
         placeholder="Nhập số điện thoại để tìm kiếm"
         rightIcon={
-          <View
-            style={{justifyContent: 'center', alignItems: 'center', flex: 1}}>
-            <MaterialIcons
-              name="person-search"
-              color={'black'}
-              size={30}
-              style={{
-                justifyContent: 'center',
-                alignItems: 'center',
-                alignSelf: 'center',
-              }}
-            />
-          </View>
+          <MaterialIcons name="person-search" color={'black'} size={30} />
         }
       />
-      <Text style={{fontWeight: '500', paddingHorizontal: 8, fontSize: 20}}>
-        Danh bạ của bạn
-      </Text>
-      {loading ? (
-        <Loading />
-      ) : (
-        <FlatList
-          data={listContacts}
-          renderItem={renderItem}
-          ItemSeparatorComponent={renderItemSeparator}
-          onEndReached={renderEndReached}
-          ListEmptyComponent={renderEmpty}
-        />
-      )}
+      <Tab
+        value={selectedTab}
+        onChange={e => setSelectedTab(e)}
+        indicatorStyle={styles.tabIndicator}>
+        <Tab.Item title="Tất cả" titleStyle={styles.tabTitle} />
+        <Tab.Item title="Tin tưởng" titleStyle={styles.tabTitle} />
+        <Tab.Item title="Spam" titleStyle={styles.tabTitle} />
+      </Tab>
+      <TabView
+        value={selectedTab}
+        onChange={setSelectedTab}
+        animationType="spring">
+        <TabView.Item style={styles.tabView}>
+          <FlatList
+            data={filterContacts('all')}
+            renderItem={renderItem}
+            ListEmptyComponent={renderEmpty}
+          />
+        </TabView.Item>
+        <TabView.Item style={styles.tabView}>
+          <FlatList
+            data={filterContacts('trust')}
+            renderItem={renderItem}
+            ListEmptyComponent={renderEmpty}
+          />
+        </TabView.Item>
+        <TabView.Item style={styles.tabView}>
+          <FlatList
+            data={filterContacts('spam')}
+            renderItem={renderItem}
+            ListEmptyComponent={renderEmpty}
+          />
+        </TabView.Item>
+      </TabView>
     </View>
   );
 };
@@ -167,11 +181,43 @@ const createStyles = () => {
       flex: 1,
       backgroundColor: 'white',
     },
-    listItem: {
-      flexDirection: 'row',
-      padding: 8,
-      alignItems: 'center',
+    input: {
+      marginTop: 8,
     },
-    input: {marginTop: 8},
+    tabIndicator: {
+      backgroundColor: 'blue',
+      height: 3,
+    },
+    tabTitle: {
+      fontSize: 14,
+      fontWeight: 'bold',
+    },
+    tabView: {
+      flex: 1,
+      backgroundColor: 'white',
+    },
+    loadingContainer: {
+      justifyContent: 'center',
+      alignItems: 'center',
+      flex: 1,
+      gap: 8,
+    },
+    headerContainer: {
+      padding: 16,
+      backgroundColor: '#f9f9f9',
+    },
+    headerTitle: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      marginBottom: 8,
+    },
+    trustedContact: {
+      fontSize: 16,
+      color: 'green',
+    },
+    noTrustedContacts: {
+      fontSize: 14,
+      color: 'gray',
+    },
   });
 };

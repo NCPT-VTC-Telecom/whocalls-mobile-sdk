@@ -36,8 +36,11 @@ const TabNavigator = () => {
             <MaterialIcons name={`${iconName}`} size={size} color={color} />
           );
         },
-        tabBarActiveTintColor: '#00A88E',
+        tabBarActiveTintColor: 'white',
         tabBarInactiveTintColor: 'gray',
+        tabBarStyle: {
+          backgroundColor: '#18538C',
+        },
         header: renderHeader(route.name),
       })}>
       <Tab.Screen name="Kiểm tra" component={CheckInformation} />

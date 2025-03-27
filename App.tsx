@@ -12,6 +12,7 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 import Welcome from './src/Welcome';
 import TabNavigator from './src/navigations/TabNavigator';
 import OptionsList from './src/screens/Settings/Options';
+import Feedback from './src/screens/Feedbacks'; // Import the Feedback screen
 
 function App(): React.JSX.Element {
   const Stack = createNativeStackNavigator();
@@ -20,17 +21,22 @@ function App(): React.JSX.Element {
     {
       name: 'Home',
       component: TabNavigator,
-      options: {title: 'Home'},
+      options: {title: 'Home', headerShown: false},
     },
     {
       name: 'OptionsList' as string,
       component: OptionsList,
-      options: {title: 'OptionsList'},
+      options: {title: 'OptionsList', headerShown: false},
     },
     {
       name: 'Welcome',
       component: Welcome,
-      options: {title: 'Details Screen'},
+      options: {title: 'Details Screen', headerShown: false},
+    },
+    {
+      name: 'Feedback', // Add the Feedback screen route
+      component: Feedback,
+      options: {title: 'Feedback', headerShown: true}, // Enable header for Feedback
     },
   ];
 
@@ -45,7 +51,7 @@ function App(): React.JSX.Element {
               key={index}
               name={screen.name}
               component={screen.component}
-              options={{title: screen.options.title}}
+              options={screen.options} // Use the options defined in the array
             />
           ))}
         </Stack.Navigator>

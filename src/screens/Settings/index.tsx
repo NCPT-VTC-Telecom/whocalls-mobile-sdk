@@ -49,23 +49,24 @@ const Settings: React.FC<StackScreenProps<any>> = ({navigation}) => {
 
   const DATA_ROUTING = [
     {
-      name: 'Cập nhật cơ sở dữ liệu',
-      icon: 'database',
-      color: '#BA3F1D',
-      onPress: updateDatabase,
-    },
-    {
-      name: 'Nâng cấp Premium',
-      icon: 'staro',
-      color: '#A77E58',
-      onPress: onPremium,
-    },
-    {
-      name: 'Tùy chọn hạng mục',
-      icon: 'setting',
+      name: 'Gửi ý kiến đánh giá',
+      description:
+        'Mọi đánh giá từ quý khách sẽ giúp chúng tôi cải thiện, nâng cao chất lượng dịch vụ',
+      icon: 'message1',
       color: '#80A1C1',
       onPress: () => {
-        navigation.navigate('OptionsList');
+        navigation.navigate('Feedback');
+      },
+    },
+    {
+      name: 'Đăng xuất',
+      icon: 'logout',
+      color: '#BA3F1D',
+      onPress: () => {
+        Alert.alert('Đăng xuất', 'Bạn có chắc chắn muốn đăng xuất?', [
+          {text: 'Hủy', style: 'cancel'},
+          {text: 'Đồng ý', onPress: () => console.log('Logged out')},
+        ]);
       },
     },
   ];
@@ -83,43 +84,31 @@ const Settings: React.FC<StackScreenProps<any>> = ({navigation}) => {
             color: 'white',
           }}
         />
-        <Text style={{fontSize: 15}}>{item?.name}</Text>
+        <View style={{flex: 1, marginLeft: 8}}>
+          <Text style={{fontSize: 15, fontWeight: '500'}}>{item?.name}</Text>
+          {item?.description && (
+            <Text style={{fontSize: 13, color: '#666'}}>
+              {item?.description}
+            </Text>
+          )}
+        </View>
       </TouchableOpacity>
     );
   };
 
   return (
     <View style={styles.container}>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          paddingHorizontal: 8,
-          marginTop: 8,
-        }}>
-        <Avatar
-          source={{
-            uri: 'https://ui-avatars.com/api/?background=random&rounded=true',
-          }}
-          size={60}
-        />
-        <View
-          style={{
-            marginHorizontal: 8,
-            flex: 1,
-            justifyContent: 'flex-end',
-            alignItems: 'flex-end',
-            paddingHorizontal: 8,
-            borderRadius: 8,
-          }}>
-          <Text style={{fontSize: 20, fontWeight: '500', marginBottom: 0}}>
-            Người dùng mới
-          </Text>
-          <Text style={{fontSize: 13}}>Gói dùng: Basic</Text>
-        </View>
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Gói Who Calls 6 tháng</Text>
+        <Text style={styles.cardText}>Thời gian đăng ký: 01/01/2025</Text>
+        <Text style={styles.cardText}>Thời gian hết hạn: 31/05/2025</Text>
+        <Text style={styles.cardText}>Mã Key: CL123MD</Text>
       </View>
-      <View style={{borderBottomWidth: 0.5, marginVertical: 16}} />
-      <FlatList data={DATA_ROUTING} renderItem={renderItem} />
+      <FlatList
+        data={DATA_ROUTING}
+        renderItem={renderItem}
+        keyExtractor={(item, index) => index.toString()}
+      />
     </View>
   );
 };
@@ -127,7 +116,20 @@ const Settings: React.FC<StackScreenProps<any>> = ({navigation}) => {
 export default Settings;
 
 const styles = StyleSheet.create({
-  container: {adding: 8, flex: 1},
+  container: {padding: 8, flex: 1, backgroundColor: '#F5F5F5'},
+  card: {
+    backgroundColor: 'white',
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  cardTitle: {fontSize: 16, fontWeight: 'bold', marginBottom: 8},
+  cardText: {fontSize: 14, color: '#666', marginBottom: 4},
   touchSettings: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -138,5 +140,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 8,
     marginVertical: 4,
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
 });
