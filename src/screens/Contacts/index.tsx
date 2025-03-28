@@ -185,12 +185,13 @@ const createStyles = () => {
       marginTop: 8,
     },
     tabIndicator: {
-      backgroundColor: 'blue',
+      backgroundColor: '#18538C',
       height: 3,
     },
     tabTitle: {
       fontSize: 14,
       fontWeight: 'bold',
+      color: '#18538C',
     },
     tabView: {
       flex: 1,
