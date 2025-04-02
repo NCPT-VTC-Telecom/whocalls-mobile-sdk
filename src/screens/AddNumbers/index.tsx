@@ -6,12 +6,16 @@ import {
   Animated,
   ActivityIndicator,
   Modal,
+  TouchableOpacity,
+  TextInput,
 } from 'react-native';
 import {Text} from 'react-native-paper';
-import {Avatar} from '@rneui/themed';
+import {Avatar, Dialog} from '@rneui/themed';
 import Toast from 'react-native-toast-message';
 import moment from 'moment';
 import {useFocusEffect} from '@react-navigation/native';
+
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface CallLog {
   id: string;
@@ -52,6 +56,9 @@ const CallLogHistory = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
+  const [selectedCallLog, setSelectedCallLog] = useState<CallLog | null>(null);
+  const [callLogInfo, setCallLogInfo] = useState<boolean>(false);
+
   useFocusEffect(
     React.useCallback(() => {
       setLoading(true);
@@ -77,30 +84,20 @@ const CallLogHistory = () => {
 
   const renderCallLog = ({item}: {item: CallLog}) => {
     const formattedTime = moment(item.time).format('HH:mm');
-    const formattedDate = moment(item.time).format('dddd, DD MMMM YYYY');
-    const isToday = moment(item.time).isSame(moment(), 'day');
-    const isYesterday = moment(item.time).isSame(
-      moment().subtract(1, 'day'),
-      'day',
-    );
-
-    const displayDate = isToday
-      ? 'Hôm nay'
-      : isYesterday
-      ? 'Hôm qua'
-      : formattedDate;
 
     return (
-      <View style={styles.callLogContainer}>
-        <Avatar
-          rounded
-          size={40}
-          source={
-            item.avatarUrl
-              ? {uri: item.avatarUrl}
-              : {uri: 'https://ui-avatars.com/api/?name=John+Doe'}
-          }
-        />
+      <TouchableOpacity
+        style={styles.callLogContainer}
+        onPress={handlePressItem(item)}>
+        {item.isSpam ? (
+          <MaterialCommunityIcons name="phone-minus" size={24} color="red" />
+        ) : (
+          <MaterialCommunityIcons
+            name="phone-incoming"
+            size={24}
+            color="green"
+          />
+        )}
         <View style={styles.callDetails}>
           <Text
             style={[
@@ -116,28 +113,30 @@ const CallLogHistory = () => {
           </Text>
         </View>
         <Text style={styles.time}>{formattedTime}</Text>
-      </View>
+      </TouchableOpacity>
     );
   };
 
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
-      </View>
-    );
-  }
+  const handlePressItem = (item: CallLog) => () => {
+    setSelectedCallLog(item);
+    setCallLogInfo(true);
+  };
 
   return (
     <Animated.View style={[styles.container, {opacity: fadeAnim}]}>
       <View style={styles.searchBar}>
-        <Avatar
-          rounded
+        <MaterialCommunityIcons
+          name="magnify"
           size={24}
-          icon={{name: 'search', type: 'font-awesome'}}
-          containerStyle={styles.searchIcon}
+          color="white"
+          style={styles.searchIcon}
         />
-        <Text style={styles.searchPlaceholder}>Tìm kiếm cuộc gọi</Text>
+
+        <TextInput
+          style={styles.searchPlaceholder}
+          placeholder="Tìm kiếm cuộc gọi"
+        />
+
         <Avatar
           rounded
           size={32}
@@ -145,11 +144,11 @@ const CallLogHistory = () => {
           containerStyle={styles.menuIcon}
           onPress={() => setModalVisible(true)}
         />
-        <Modal
+        <Dialog
+          isVisible={modalVisible}
           transparent={true}
-          visible={modalVisible}
           animationType="fade"
-          onRequestClose={() => setModalVisible(false)}>
+          onBackdropPress={() => setModalVisible(false)}>
           <View style={styles.modalOverlay}>
             <View style={styles.modalContainer}>
               <Text
@@ -174,7 +173,7 @@ const CallLogHistory = () => {
               </Text>
             </View>
           </View>
-        </Modal>
+        </Dialog>
       </View>
       <View style={styles.headerContainer}>
         <Text style={styles.header}>Danh sách cuộc gọi</Text>
@@ -192,14 +191,41 @@ const CallLogHistory = () => {
           }}
         />
       </View>
-      <FlatList
-        data={callLogs}
-        keyExtractor={item => item.id}
-        renderItem={renderCallLog}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
-        refreshing={refreshing}
-        onRefresh={onRefresh}
-      />
+      {refreshing ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#18538C" />
+        </View>
+      ) : (
+        <FlatList
+          data={callLogs}
+          keyExtractor={item => item.id}
+          renderItem={renderCallLog}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+        />
+      )}
+      <Dialog
+        transparent={true}
+        isVisible={callLogInfo}
+        animationType="fade"
+        onBackdropPress={() => setCallLogInfo(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalOption}>
+              Số điện thoại: {selectedCallLog?.phoneNumber}
+            </Text>
+            <Text style={styles.modalOption}>
+              Trạng thái: {selectedCallLog?.isSpam ? 'Spam' : 'Không Spam'}
+            </Text>
+            <TouchableOpacity
+              onPress={() => setCallLogInfo(false)}
+              style={styles.modalOption}>
+              Đóng
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Dialog>
     </Animated.View>
   );
 };
@@ -223,7 +249,9 @@ const createStyles = () => {
     },
     searchIcon: {
       marginRight: 8,
+      padding: 4,
       backgroundColor: '#18538C',
+      borderRadius: 32,
     },
     searchPlaceholder: {
       flex: 1,
@@ -281,8 +309,6 @@ const createStyles = () => {
       alignItems: 'center',
     },
     modalOverlay: {
-      flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
       justifyContent: 'center',
       alignItems: 'center',
     },

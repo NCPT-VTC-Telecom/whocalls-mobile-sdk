@@ -24,9 +24,9 @@ const TabNavigator = () => {
 
           if (route.name === 'Kiểm tra') {
             iconName = 'check-circle'; // Icon name for Home
-          } else if (route.name === 'Lịch sử') {
+          } else if (route.name === 'Danh sách') {
             iconName = 'contacts'; // Icon name for Profile
-          } else if (route.name === 'Thêm') {
+          } else if (route.name === 'Lịch sử') {
             iconName = 'person-add-alt-1'; // Icon name for Profile
           } else if (route.name === 'Cài đặt') {
             iconName = 'settings';
@@ -37,15 +37,17 @@ const TabNavigator = () => {
           );
         },
         tabBarActiveTintColor: 'white',
-        tabBarInactiveTintColor: 'gray',
+        tabBarInactiveTintColor: 'rgba(255, 255, 255, 0.5)',
         tabBarStyle: {
           backgroundColor: '#18538C',
+          padding: 15,
+          // position: 'absolute',
         },
         header: renderHeader(route.name),
       })}>
       <Tab.Screen name="Kiểm tra" component={CheckInformation} />
-      <Tab.Screen name="Lịch sử" component={ContactsList} />
-      <Tab.Screen name="Thêm" component={AddNumbers} />
+      <Tab.Screen name="Lịch sử" component={AddNumbers} />
+      <Tab.Screen name="Danh sách" component={ContactsList} />
       <Tab.Screen name="Cài đặt" component={Settings} />
     </Tab.Navigator>
   );

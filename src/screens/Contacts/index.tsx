@@ -127,7 +127,7 @@ const ContactsList = () => {
 
   return (
     <View style={styles.container}>
-      {renderHeader()}
+      {/* {renderHeader()} */}
       <Input
         style={styles.input}
         placeholder="Nhập số điện thoại để tìm kiếm"

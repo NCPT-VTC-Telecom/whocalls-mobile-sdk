@@ -67,7 +67,7 @@ const HeaderNavigator = ({name}: HeaderNavigatorProps) => {
             <Text style={styles.modalTitle}>Add Phone Number</Text>
             <TextInput
               style={styles.input}
-              placeholder="Enter phone number"
+              placeholder="Thêm số điện thoại"
               value={phoneNumber}
               onChangeText={setPhoneNumber}
               keyboardType="phone-pad"
@@ -78,14 +78,14 @@ const HeaderNavigator = ({name}: HeaderNavigatorProps) => {
                 style={styles.radioButton}>
                 <Text
                   style={status === 'trusted' ? styles.radioSelected : null}>
-                  Trusted
+                  Tin cậy
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => setStatus('spam')}
                 style={styles.radioButton}>
                 <Text style={status === 'spam' ? styles.radioSelected : null}>
-                  Spam
+                  Không tin cây
                 </Text>
               </TouchableOpacity>
             </View>
