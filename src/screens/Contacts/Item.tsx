@@ -10,7 +10,9 @@ const Item = ({item}: {item: ContactList}) => {
   const renderSheet = () => {
     <ContactInfo isVisible={true} />;
   };
-
+  if (!item) {
+    return <View />;
+  }
   return (
     <TouchableOpacity
       onPress={renderSheet}

@@ -3,19 +3,21 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
+  Platform,
   StyleSheet,
   View,
-  TouchableOpacity,
 } from 'react-native';
-import {Tab, TabView} from '@rneui/themed';
+import {Button, Dialog, Tab, TabView} from '@rneui/themed';
 import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 import Contacts from 'react-native-contacts';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {Input} from '@rneui/themed';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Text from '../../components/Text';
 import EmptyComponents from '../../components/Empty';
 import Loading from '../../components/Loading';
 import Item from './Item';
+import {RadioButton} from 'react-native-paper';
 
 const ContactsList = () => {
   const styles = createStyles();
@@ -25,9 +27,15 @@ const ContactsList = () => {
   const [loading, setLoading] = React.useState(false);
   const [selectedTab, setSelectedTab] = React.useState(0);
 
+  const [isAddNumber, setIsAddNumber] = React.useState<boolean>(false);
+  const [newNumber, setNewNumber] = React.useState<string>('');
+
   React.useEffect(() => {
-    checkContactsPermission();
-    if (permissionStatus === RESULTS.GRANTED) getContact();
+    if (Platform.OS === 'android') {
+      checkContactsPermission();
+      if (permissionStatus === RESULTS.GRANTED) getContact();
+      loadContactsFromStorage();
+    }
   }, [permissionStatus]);
 
   const checkContactsPermission = async () => {
@@ -47,7 +55,6 @@ const ContactsList = () => {
     try {
       const result: any = await request(PERMISSIONS.ANDROID.READ_CONTACTS);
       setPermissionStatus(result);
-
       if (result === RESULTS.GRANTED) {
         Alert.alert('Permission Granted', 'You can now access contacts.');
       } else {
@@ -72,6 +79,51 @@ const ContactsList = () => {
     }
   };
 
+  const loadContactsFromStorage = async () => {
+    try {
+      const storedContacts = await AsyncStorage.getItem('customContacts');
+      if (storedContacts) {
+        const parsedContacts = JSON.parse(storedContacts);
+        setListContacts((prevContacts: any) => [
+          ...prevContacts,
+          ...parsedContacts,
+        ]);
+      }
+    } catch (error) {
+      console.error('Error loading contacts from storage:', error);
+    }
+  };
+
+  const saveContactToStorage = async (contact: any) => {
+    try {
+      const storedContacts = await AsyncStorage.getItem('customContacts');
+      const parsedContacts = storedContacts ? JSON.parse(storedContacts) : [];
+      const updatedContacts = [...parsedContacts, contact];
+      await AsyncStorage.setItem(
+        'customContacts',
+        JSON.stringify(updatedContacts),
+      );
+    } catch (error) {
+      console.error('Error saving contact to storage:', error);
+    }
+  };
+
+  const addNewContact = () => {
+    if (!newNumber.trim()) {
+      Alert.alert('Error', 'Please enter a valid phone number.');
+      return;
+    }
+
+    const newContact = {
+      name: `Custom Contact ${newNumber}`,
+      phoneNumber: newNumber,
+    };
+    setListContacts((prevContacts: any) => [...prevContacts, newContact]);
+    saveContactToStorage(newContact);
+    setNewNumber('');
+    setIsAddNumber(false);
+  };
+
   const filterContacts = (type: string) => {
     if (type === 'trust') {
       return listContacts.filter((contact: any) =>
@@ -93,26 +145,22 @@ const ContactsList = () => {
     return <EmptyComponents onPress={getContact} />;
   };
 
-  const renderHeader = () => {
-    const trustedContacts = filterContacts('trust');
-    return (
-      <View style={styles.headerContainer}>
-        <Text style={styles.headerTitle}>Trusted Numbers</Text>
-        {trustedContacts.length > 0 ? (
-          <FlatList
-            data={trustedContacts}
-            keyExtractor={(item: any) => item.recordID}
-            renderItem={({item}) => (
-              <Text style={styles.trustedContact}>{item.name}</Text>
-            )}
-          />
-        ) : (
-          <Text style={styles.noTrustedContacts}>
-            No trusted contacts found
-          </Text>
-        )}
-      </View>
-    );
+  const onPressAddNumber = () => {
+    setIsAddNumber(true);
+  };
+
+  const onChangeMarkSpam = (item: any) => {
+    const updatedContacts = listContacts.map((contact: any) => {
+      if (contact.phoneNumber === item.phoneNumber) {
+        return {
+          ...contact,
+          isSpam: !contact.isSpam,
+        };
+      }
+      return contact;
+    });
+    setListContacts(updatedContacts);
+    saveContactToStorage(updatedContacts);
   };
 
   if (loading)
@@ -127,14 +175,6 @@ const ContactsList = () => {
 
   return (
     <View style={styles.container}>
-      {/* {renderHeader()} */}
-      <Input
-        style={styles.input}
-        placeholder="Nhập số điện thoại để tìm kiếm"
-        rightIcon={
-          <MaterialIcons name="person-search" color={'black'} size={30} />
-        }
-      />
       <Tab
         value={selectedTab}
         onChange={e => setSelectedTab(e)}
@@ -169,6 +209,41 @@ const ContactsList = () => {
           />
         </TabView.Item>
       </TabView>
+      <Button
+        title="Thêm số"
+        onPress={onPressAddNumber}
+        containerStyle={{margin: 16}}
+      />
+      <Dialog
+        isVisible={isAddNumber}
+        onBackdropPress={() => setIsAddNumber(false)}
+        overlayStyle={{
+          borderRadius: 16,
+          padding: 16,
+          width: '90%',
+          height: 350,
+        }}
+        animationType="fade">
+        <View style={{justifyContent: 'center', alignItems: 'center', flex: 1}}>
+          <Text style={styles.headerTitle}>Thêm số điện thoại tin tưởng</Text>
+          <Input
+            placeholder="Nhập số điện thoại"
+            leftIcon={{type: 'font-awesome', name: 'phone', color: '#18538C'}}
+            containerStyle={{width: '100%', marginBottom: 16}}
+            value={newNumber}
+            onChangeText={setNewNumber}
+          />
+          <View>
+            <RadioButton
+              value="first"
+              status={'checked'}
+              // onPress={() => setChecked('first')}
+            />
+            <RadioButton value="Tin tưởng" color="#18538C" />
+          </View>
+          <Button title="OK" onPress={addNewContact} />
+        </View>
+      </Dialog>
     </View>
   );
 };
@@ -182,7 +257,10 @@ const createStyles = () => {
       backgroundColor: 'white',
     },
     input: {
-      marginTop: 8,
+      backgroundColor: '#f5f5f5',
+      borderRadius: 8,
+      padding: 16,
+      flex: 1,
     },
     tabIndicator: {
       backgroundColor: '#18538C',
@@ -204,21 +282,14 @@ const createStyles = () => {
       gap: 8,
     },
     headerContainer: {
-      padding: 16,
+      flexDirection: 'row',
       backgroundColor: '#f9f9f9',
     },
     headerTitle: {
       fontSize: 18,
-      fontWeight: 'bold',
+      fontWeight: '500',
+      color: '#18538C',
       marginBottom: 8,
-    },
-    trustedContact: {
-      fontSize: 16,
-      color: 'green',
-    },
-    noTrustedContacts: {
-      fontSize: 14,
-      color: 'gray',
     },
   });
 };

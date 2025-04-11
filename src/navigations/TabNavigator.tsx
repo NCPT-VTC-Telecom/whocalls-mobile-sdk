@@ -1,14 +1,12 @@
-import {View, Text} from 'react-native';
 import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import ContactsList from '../screens/Contacts';
 import HeaderNavigator from './HeaderNavigator';
-import {Header} from '@react-navigation/elements';
 import Settings from '../screens/Settings';
-import AddNumbers from '../screens/AddNumbers';
 import CheckInformation from '../screens/Home';
+import SMSPage from '../screens/SMS';
+import {Platform, Animated, Easing} from 'react-native';
 
 const Tab = createBottomTabNavigator();
 
@@ -16,6 +14,7 @@ const TabNavigator = () => {
   const renderHeader = (name: string) => () => {
     return <HeaderNavigator name={name} />;
   };
+
   return (
     <Tab.Navigator
       screenOptions={({route}) => ({
@@ -23,17 +22,33 @@ const TabNavigator = () => {
           let iconName;
 
           if (route.name === 'Kiểm tra') {
-            iconName = 'check-circle'; // Icon name for Home
+            iconName = 'check-circle';
           } else if (route.name === 'Danh sách') {
-            iconName = 'contacts'; // Icon name for Profile
+            iconName = 'contacts';
           } else if (route.name === 'Lịch sử') {
-            iconName = 'person-add-alt-1'; // Icon name for Profile
+            iconName = 'person-add-alt-1';
           } else if (route.name === 'Cài đặt') {
             iconName = 'settings';
+          } else if (route.name === 'SMS') {
+            iconName = 'message';
+          } else {
+            iconName = 'home';
           }
 
+          // Animation for bouncy effect
+          const scale = new Animated.Value(focused ? 1.2 : 1);
+
+          Animated.timing(scale, {
+            toValue: focused ? 1.2 : 1,
+            duration: 300,
+            easing: Easing.bounce,
+            useNativeDriver: true,
+          }).start();
+
           return (
-            <MaterialIcons name={`${iconName}`} size={size} color={color} />
+            <Animated.View style={{transform: [{scale}]}}>
+              <MaterialIcons name={`${iconName}`} size={size} color={color} />
+            </Animated.View>
           );
         },
         tabBarActiveTintColor: 'white',
@@ -41,12 +56,17 @@ const TabNavigator = () => {
         tabBarStyle: {
           backgroundColor: '#18538C',
           padding: 15,
-          // position: 'absolute',
         },
         header: renderHeader(route.name),
       })}>
       <Tab.Screen name="Kiểm tra" component={CheckInformation} />
-      <Tab.Screen name="Lịch sử" component={AddNumbers} />
+      {Platform.OS === 'android' && (
+        <Tab.Screen
+          name="SMS"
+          component={SMSPage}
+          options={{headerShown: false}}
+        />
+      )}
       <Tab.Screen name="Danh sách" component={ContactsList} />
       <Tab.Screen name="Cài đặt" component={Settings} />
     </Tab.Navigator>

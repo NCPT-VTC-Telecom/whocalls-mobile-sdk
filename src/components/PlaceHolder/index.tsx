@@ -1,47 +1,75 @@
-import React, {useEffect, useRef} from 'react';
-import {Animated, StyleSheet, View} from 'react-native';
+import React from 'react';
+import {View, Animated, StyleSheet, Dimensions, ScrollView} from 'react-native';
 
-const PlaceHolder: React.FC = () => {
-  const opacity = useRef(new Animated.Value(0.3)).current;
+const {width} = Dimensions.get('window');
 
-  useEffect(() => {
-    const animation = Animated.loop(
+const PlaceHolderItem = ({
+  opacity,
+}: {
+  opacity: Animated.AnimatedInterpolation<number>;
+}) => (
+  <View style={styles.container}>
+    <Animated.View style={[styles.placeholder, {opacity}]} />
+    <Animated.View
+      style={[styles.placeholder, styles.shortPlaceholder, {opacity}]}
+    />
+    <Animated.View style={[styles.placeholder, {opacity}]} />
+  </View>
+);
+
+const PlaceHolder = () => {
+  const animatedValue = React.useRef(new Animated.Value(0)).current;
+
+  React.useEffect(() => {
+    Animated.loop(
       Animated.sequence([
-        Animated.timing(opacity, {
+        Animated.timing(animatedValue, {
           toValue: 1,
           duration: 1000,
           useNativeDriver: true,
         }),
-        Animated.timing(opacity, {
-          toValue: 0.3,
+        Animated.timing(animatedValue, {
+          toValue: 0,
           duration: 1000,
           useNativeDriver: true,
         }),
       ]),
-    );
-    animation.start();
+    ).start();
+  }, []);
 
-    return () => animation.stop();
-  }, [opacity]);
+  const opacity = animatedValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.3, 0.7],
+  });
 
   return (
-    <View style={styles.container}>
-      <Animated.View style={[styles.loader, {opacity}]} />
-    </View>
+    <ScrollView style={styles.scrollView}>
+      {Array(5)
+        .fill(null)
+        .map((_, index) => (
+          <PlaceHolderItem key={index} opacity={opacity} />
+        ))}
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  scrollView: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
-  loader: {
-    width: 100,
-    height: 100,
-    backgroundColor: '#e0e0e0',
-    borderRadius: 10,
+  container: {
+    padding: 16,
+    gap: 8,
+  },
+  placeholder: {
+    height: 20,
+    backgroundColor: '#E1E9EE',
+    borderRadius: 4,
+
+    width: (width - 32) * 0.9,
+  },
+  shortPlaceholder: {
+    width: (width - 32) * 0.7,
   },
 });
 

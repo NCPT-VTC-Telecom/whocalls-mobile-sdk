@@ -10,12 +10,15 @@ import {
   TextInput,
 } from 'react-native';
 import {Text} from 'react-native-paper';
-import {Avatar, Dialog} from '@rneui/themed';
+import {Avatar, Button, Dialog} from '@rneui/themed';
 import Toast from 'react-native-toast-message';
 import moment from 'moment';
 import {useFocusEffect} from '@react-navigation/native';
 
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {getCallInformation} from '../../hooks/AddNumberSpam';
+import EmptyComponents from '../../components/Empty';
+import PlaceHolder from '../../components/PlaceHolder';
 
 interface CallLog {
   id: string;
@@ -24,30 +27,6 @@ interface CallLog {
   time: string;
   avatarUrl?: string;
 }
-
-const callLogs: CallLog[] = [
-  {
-    id: '1',
-    phoneNumber: '0948641075',
-    isSpam: false,
-    time: '2023-01-13T10:00:00',
-    avatarUrl: '',
-  },
-  {
-    id: '2',
-    phoneNumber: '0911335567',
-    isSpam: false,
-    time: '2023-01-13T09:00:00',
-    avatarUrl: '',
-  },
-  {
-    id: '3',
-    phoneNumber: '0911335567',
-    isSpam: true,
-    time: '2023-01-12T09:00:00',
-    avatarUrl: '',
-  },
-];
 
 const CallLogHistory = () => {
   const styles = createStyles();
@@ -59,6 +38,8 @@ const CallLogHistory = () => {
   const [selectedCallLog, setSelectedCallLog] = useState<CallLog | null>(null);
   const [callLogInfo, setCallLogInfo] = useState<boolean>(false);
 
+  const [callLogs, setCallLogs] = useState<CallLog[]>([]);
+
   useFocusEffect(
     React.useCallback(() => {
       setLoading(true);
@@ -66,7 +47,10 @@ const CallLogHistory = () => {
         toValue: 1,
         duration: 500,
         useNativeDriver: true,
-      }).start(() => setLoading(false));
+      }).start(() => {
+        handleGetCalllog();
+        setLoading(false);
+      });
     }, [fadeAnim]),
   );
 
@@ -81,6 +65,18 @@ const CallLogHistory = () => {
       });
     }, 2000);
   }, []);
+
+  const handleGetCalllog = async () => {
+    try {
+      setLoading(true);
+
+      const callLogs = await getCallInformation();
+      setCallLogs(callLogs);
+    } catch (error) {
+      console.error('Error fetching call logs:', error);
+      setLoading(false);
+    }
+  };
 
   const renderCallLog = ({item}: {item: CallLog}) => {
     const formattedTime = moment(item.time).format('HH:mm');
@@ -182,18 +178,12 @@ const CallLogHistory = () => {
           size={32}
           icon={{name: 'plus', type: 'font-awesome'}}
           containerStyle={styles.addIcon}
-          onPress={() => {
-            Toast.show({
-              type: 'success',
-              text1: 'Thêm số mới',
-              text2: 'Bạn có thể thêm số mới vào danh sách.',
-            });
-          }}
+          onPress={() => {}}
         />
       </View>
       {refreshing ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#18538C" />
+          <PlaceHolder />
         </View>
       ) : (
         <FlatList
@@ -202,6 +192,7 @@ const CallLogHistory = () => {
           renderItem={renderCallLog}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
           refreshing={refreshing}
+          ListEmptyComponent={() => <EmptyComponents onPress={() => {}} />}
           onRefresh={onRefresh}
         />
       )}
@@ -209,21 +200,47 @@ const CallLogHistory = () => {
         transparent={true}
         isVisible={callLogInfo}
         animationType="fade"
+        style={{borderRadius: 16}}
         onBackdropPress={() => setCallLogInfo(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContainer}>
-            <Text style={styles.modalOption}>
-              Số điện thoại: {selectedCallLog?.phoneNumber}
-            </Text>
-            <Text style={styles.modalOption}>
-              Trạng thái: {selectedCallLog?.isSpam ? 'Spam' : 'Không Spam'}
-            </Text>
-            <TouchableOpacity
-              onPress={() => setCallLogInfo(false)}
-              style={styles.modalOption}>
-              Đóng
-            </TouchableOpacity>
+            <MaterialCommunityIcons
+              name="account-supervisor-circle"
+              size={60}
+              style={{marginRight: 16}}
+              color={'grey'}
+            />
+            {selectedCallLog?.isSpam ? (
+              <MaterialCommunityIcons
+                name="alert-circle"
+                size={24}
+                color="red"
+                style={styles.tickBackground}
+              />
+            ) : (
+              <MaterialCommunityIcons
+                name="check-circle"
+                size={24}
+                color="green"
+                style={styles.tickBackground}
+              />
+            )}
+            <View>
+              <Text style={styles.modalOption}>
+                Số điện thoại: {selectedCallLog?.phoneNumber}
+              </Text>
+              <Text style={styles.modalOption}>
+                Trạng thái: {selectedCallLog?.isSpam ? 'Spam' : 'Không Spam'}
+              </Text>
+            </View>
           </View>
+
+          <Button
+            title="Đóng"
+            onPress={() => setCallLogInfo(false)}
+            containerStyle={{width: '100%'}}
+            buttonStyle={{backgroundColor: '#18538C'}}
+          />
         </View>
       </Dialog>
     </Animated.View>
@@ -309,20 +326,30 @@ const createStyles = () => {
       alignItems: 'center',
     },
     modalOverlay: {
+      gap: 16,
+      borderRadius: 16,
       justifyContent: 'center',
       alignItems: 'center',
     },
     modalContainer: {
-      width: '80%',
+      flexDirection: 'row',
       backgroundColor: 'white',
       borderRadius: 8,
-      padding: 16,
       alignItems: 'center',
     },
     modalOption: {
       fontSize: 16,
-      paddingVertical: 8,
       color: 'black',
+    },
+    tickBackground: {
+      position: 'absolute',
+      left: 40,
+      bottom: 0,
+      backgroundColor: 'white',
+      borderRadius: 24,
+      shadowOffset: {height: 50, width: -50},
+      shadowColor: 'black',
+      shadowOpacity: 40,
     },
   });
 };

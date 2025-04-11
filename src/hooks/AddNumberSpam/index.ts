@@ -8,7 +8,7 @@ export interface CallInformation {
 }
 
 // This file handles the storage and retrieval of call information
-const STORAGE_KEY = 'callInformation';
+export const STORAGE_KEY = 'callInformation';
 
 export const getCallInformation = async (): Promise<CallInformation[]> => {
   try {

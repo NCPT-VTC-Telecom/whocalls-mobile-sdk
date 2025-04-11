@@ -100,7 +100,7 @@ export const getPhoneNumberInformation = (number: string): Promise<any> => {
 
   return new Promise((resolve, reject) => {
     let result: EmitterSubscription;
-    result = DeviceEventEmitter.addListener('Status', data => {
+    result = DeviceEventEmitter.addListener('PhoneNumberInfo', data => {
       resolve(data);
       result.remove();
     });

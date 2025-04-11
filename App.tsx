@@ -61,6 +61,4 @@ function App(): React.JSX.Element {
   );
 }
 
-AppRegistry.registerComponent(appName, () => App);
-
 export default App;

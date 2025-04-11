@@ -23,7 +23,6 @@ const Welcome: React.FC<StackScreenProps<any>> = ({navigation}) => {
   const renderBottomSheet = () => {
     return (
       <BottomSheet isVisible={open}>
-        {/* <SafeAreaView> */}
         <ScrollView
           style={{height: 500, flex: 1, backgroundColor: 'white', padding: 16}}
           showsVerticalScrollIndicator={false}>
@@ -53,7 +52,6 @@ const Welcome: React.FC<StackScreenProps<any>> = ({navigation}) => {
             <Text style={{color: 'white', fontWeight: '500'}}>Tôi đã đọc</Text>
           </TouchableOpacity>
         </ScrollView>
-        {/* </SafeAreaView> */}
       </BottomSheet>
     );
   };

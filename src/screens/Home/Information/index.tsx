@@ -1,11 +1,4 @@
-import {
-  Linking,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import {Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React from 'react';
 import {BottomSheet} from '@rneui/themed';
 import {Avatar} from '@rneui/base';
@@ -24,13 +17,7 @@ interface Interface {
   isSpam?: boolean;
 }
 
-const Information: React.FC<Interface> = ({
-  item,
-  onPressClose,
-  onPress,
-  isVisible,
-  isSpam,
-}) => {
+const Information: React.FC<Interface> = ({item, onPressClose, onPress, isVisible, isSpam}) => {
   const DATA_ROUTING = [
     {
       name: 'Chặn',
@@ -94,11 +81,7 @@ const Information: React.FC<Interface> = ({
   const styles = createStyles();
   return (
     <BottomSheet isVisible={isVisible} containerStyle={{}}>
-      <View
-        style={[
-          styles.container,
-          {borderTopLeftRadius: 16, borderTopRightRadius: 16},
-        ]}>
+      <View style={[styles.container, {borderTopLeftRadius: 16, borderTopRightRadius: 16}]}>
         <TouchableOpacity style={styles.icon} onPress={onPressClose}>
           <AntDesign name="closecircle" size={30} />
         </TouchableOpacity>
@@ -133,17 +116,12 @@ const Information: React.FC<Interface> = ({
               }}>
               <Text style={styles.description}>Mô tả</Text>
               <Text style={[styles.description, {flex: 1, textAlign: 'right'}]}>
-                Lorem Ipsum is simply dummy text of the printing and typesetting
-                industry. Lorem Ipsum has been the industry's standard dummy
-                text ever since the 1500s
+                Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s
               </Text>
             </View>
-            <View
-              style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+            <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
               <Text style={styles.description}>Phân loại</Text>
-              <Text style={[styles.description, {textAlign: 'right'}]}>
-                Chưa có tên
-              </Text>
+              <Text style={[styles.description, {textAlign: 'right'}]}>Chưa có tên</Text>
             </View>
             <View
               style={{
