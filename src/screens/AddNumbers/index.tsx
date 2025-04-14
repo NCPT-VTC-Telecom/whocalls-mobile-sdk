@@ -19,6 +19,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import {getCallInformation} from '../../hooks/AddNumberSpam';
 import EmptyComponents from '../../components/Empty';
 import PlaceHolder from '../../components/PlaceHolder';
+import {SheetManager} from 'react-native-actions-sheet';
 
 interface CallLog {
   id: string;
@@ -118,6 +119,7 @@ const CallLogHistory = () => {
     setCallLogInfo(true);
   };
 
+
   return (
     <Animated.View style={[styles.container, {opacity: fadeAnim}]}>
       <View style={styles.searchBar}>
@@ -196,7 +198,7 @@ const CallLogHistory = () => {
           onRefresh={onRefresh}
         />
       )}
-      <Dialog
+      {/* <Dialog
         transparent={true}
         isVisible={callLogInfo}
         animationType="fade"
@@ -242,7 +244,7 @@ const CallLogHistory = () => {
             buttonStyle={{backgroundColor: '#18538C'}}
           />
         </View>
-      </Dialog>
+      </Dialog> */}
     </Animated.View>
   );
 };

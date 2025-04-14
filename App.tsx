@@ -13,6 +13,7 @@ import Welcome from './src/Welcome';
 import TabNavigator from './src/navigations/TabNavigator';
 import OptionsList from './src/screens/Settings/Options';
 import Feedback from './src/screens/Feedbacks'; // Import the Feedback screen
+import {SheetProvider} from 'react-native-actions-sheet';
 
 function App(): React.JSX.Element {
   const Stack = createNativeStackNavigator();
@@ -41,23 +42,25 @@ function App(): React.JSX.Element {
   ];
 
   return (
-    <SafeAreaProvider>
-      <NavigationContainer>
-        <Stack.Navigator
-          screenOptions={{headerShown: false}}
-          initialRouteName="Home">
-          {screen.map((screen, index) => (
-            <Stack.Screen
-              key={index}
-              name={screen.name}
-              component={screen.component}
-              options={screen.options} // Use the options defined in the array
-            />
-          ))}
-        </Stack.Navigator>
-      </NavigationContainer>
-      <Toast />
-    </SafeAreaProvider>
+    <SheetProvider>
+      <SafeAreaProvider>
+        <NavigationContainer>
+          <Stack.Navigator
+            screenOptions={{headerShown: false}}
+            initialRouteName="Home">
+            {screen.map((screen, index) => (
+              <Stack.Screen
+                key={index}
+                name={screen.name}
+                component={screen.component}
+                options={screen.options} // Use the options defined in the array
+              />
+            ))}
+          </Stack.Navigator>
+        </NavigationContainer>
+        <Toast />
+      </SafeAreaProvider>
+    </SheetProvider>
   );
 }
 

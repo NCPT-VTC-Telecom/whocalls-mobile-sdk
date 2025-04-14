@@ -18,6 +18,7 @@ import EmptyComponents from '../../components/Empty';
 import Loading from '../../components/Loading';
 import Item from './Item';
 import {RadioButton} from 'react-native-paper';
+import {SheetManager} from 'react-native-actions-sheet';
 
 const ContactsList = () => {
   const styles = createStyles();
@@ -149,6 +150,12 @@ const ContactsList = () => {
     setIsAddNumber(true);
   };
 
+  const showSheet = () => {
+    SheetManager.show('view', {
+      payload: <View>{/* Add your content here */}</View>,
+    });
+  };
+
   const onChangeMarkSpam = (item: any) => {
     const updatedContacts = listContacts.map((contact: any) => {
       if (contact.phoneNumber === item.phoneNumber) {
@@ -211,7 +218,7 @@ const ContactsList = () => {
       </TabView>
       <Button
         title="Thêm số"
-        onPress={onPressAddNumber}
+        onPress={showSheet}
         containerStyle={{margin: 16}}
       />
       <Dialog
