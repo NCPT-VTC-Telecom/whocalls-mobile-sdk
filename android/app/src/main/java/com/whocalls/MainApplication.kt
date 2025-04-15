@@ -48,6 +48,7 @@ class MainApplication : Application(), ReactApplication {
     createSilentNotification()
   }
 
+    // Set silent notification for the activity bar
   private fun createSilentNotification() {
     val channelId = "silent_notification_channel"
     val channelName = "Silent Notifications"

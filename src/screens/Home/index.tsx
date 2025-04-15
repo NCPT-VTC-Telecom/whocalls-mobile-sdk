@@ -52,7 +52,24 @@ const CheckInformation = () => {
       if (requestResult !== RESULTS.GRANTED) {
         Alert.alert(
           'Permission Denied',
-          'You need to allow this permission to manage phone calls.',
+          'The app requires access to phone state to function properly.',
+          [
+            {
+              text: 'Grant Permission',
+              onPress: async () => {
+                const requestResult = await request(
+                  PERMISSIONS.ANDROID.READ_PHONE_STATE,
+                );
+                if (requestResult !== RESULTS.GRANTED) {
+                  Alert.alert(
+                    'Permission Still Denied',
+                    'You need to enable the permission from the settings.',
+                  );
+                }
+              },
+            },
+            {text: 'Cancel', style: 'cancel'},
+          ],
         );
       }
     } else if (result === RESULTS.BLOCKED) {
