@@ -119,7 +119,6 @@ const CallLogHistory = () => {
     setCallLogInfo(true);
   };
 
-
   return (
     <Animated.View style={[styles.container, {opacity: fadeAnim}]}>
       <View style={styles.searchBar}>
@@ -198,53 +197,6 @@ const CallLogHistory = () => {
           onRefresh={onRefresh}
         />
       )}
-      {/* <Dialog
-        transparent={true}
-        isVisible={callLogInfo}
-        animationType="fade"
-        style={{borderRadius: 16}}
-        onBackdropPress={() => setCallLogInfo(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <MaterialCommunityIcons
-              name="account-supervisor-circle"
-              size={60}
-              style={{marginRight: 16}}
-              color={'grey'}
-            />
-            {selectedCallLog?.isSpam ? (
-              <MaterialCommunityIcons
-                name="alert-circle"
-                size={24}
-                color="red"
-                style={styles.tickBackground}
-              />
-            ) : (
-              <MaterialCommunityIcons
-                name="check-circle"
-                size={24}
-                color="green"
-                style={styles.tickBackground}
-              />
-            )}
-            <View>
-              <Text style={styles.modalOption}>
-                Số điện thoại: {selectedCallLog?.phoneNumber}
-              </Text>
-              <Text style={styles.modalOption}>
-                Trạng thái: {selectedCallLog?.isSpam ? 'Spam' : 'Không Spam'}
-              </Text>
-            </View>
-          </View>
-
-          <Button
-            title="Đóng"
-            onPress={() => setCallLogInfo(false)}
-            containerStyle={{width: '100%'}}
-            buttonStyle={{backgroundColor: '#18538C'}}
-          />
-        </View>
-      </Dialog> */}
     </Animated.View>
   );
 };

@@ -3,11 +3,14 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
+  Modal,
   Platform,
   StyleSheet,
+  TextInput,
+  TouchableOpacity,
   View,
 } from 'react-native';
-import {Button, Dialog, Tab, TabView} from '@rneui/themed';
+import {BottomSheet, Button, Dialog, Tab, TabView} from '@rneui/themed';
 import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 import Contacts from 'react-native-contacts';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -19,6 +22,8 @@ import Loading from '../../components/Loading';
 import Item from './Item';
 import {RadioButton} from 'react-native-paper';
 import {SheetManager} from 'react-native-actions-sheet';
+import Toast from 'react-native-toast-message';
+import CategorizeNumber from './CategorizeNumber';
 
 const ContactsList = () => {
   const styles = createStyles();
@@ -82,58 +87,29 @@ const ContactsList = () => {
 
   const loadContactsFromStorage = async () => {
     try {
-      const storedContacts = await AsyncStorage.getItem('customContacts');
-      if (storedContacts) {
-        const parsedContacts = JSON.parse(storedContacts);
-        setListContacts((prevContacts: any) => [
-          ...prevContacts,
-          ...parsedContacts,
-        ]);
-      }
+      const storedContacts = await AsyncStorage.getItem('categorizedNumbers');
+      // if (storedContacts) {
+      //   const parsedContacts = JSON.parse(storedContacts);
+      //   setListContacts((prevContacts: any) => [
+      //     ...prevContacts,
+      //     ...parsedContacts,
+      //   ]);
+      // }
+      setListContacts(storedContacts);
+      console.log('Stored Contacts:', storedContacts);
     } catch (error) {
       console.error('Error loading contacts from storage:', error);
     }
   };
 
-  const saveContactToStorage = async (contact: any) => {
-    try {
-      const storedContacts = await AsyncStorage.getItem('customContacts');
-      const parsedContacts = storedContacts ? JSON.parse(storedContacts) : [];
-      const updatedContacts = [...parsedContacts, contact];
-      await AsyncStorage.setItem(
-        'customContacts',
-        JSON.stringify(updatedContacts),
-      );
-    } catch (error) {
-      console.error('Error saving contact to storage:', error);
-    }
-  };
+  console.log('List Contacts:', listContacts);
 
-  const addNewContact = () => {
-    if (!newNumber.trim()) {
-      Alert.alert('Error', 'Please enter a valid phone number.');
-      return;
-    }
-
-    const newContact = {
-      name: `Custom Contact ${newNumber}`,
-      phoneNumber: newNumber,
-    };
-    setListContacts((prevContacts: any) => [...prevContacts, newContact]);
-    saveContactToStorage(newContact);
-    setNewNumber('');
-    setIsAddNumber(false);
-  };
-
-  const filterContacts = (type: string) => {
-    if (type === 'trust') {
-      return listContacts.filter((contact: any) =>
-        contact.name?.toLowerCase().includes('trust'),
-      );
-    } else if (type === 'spam') {
-      return listContacts.filter((contact: any) =>
-        contact.name?.toLowerCase().includes('spam'),
-      );
+  const filterContacts = (category: string) => {
+    if (!listContacts) return [];
+    if (category === 'not-spam') {
+      return listContacts?.filter?.(i => i?.category === 'not-spam');
+    } else if (category === 'spam') {
+      return listContacts?.filter?.(i => i?.category === 'spam');
     }
     return listContacts;
   };
@@ -150,24 +126,8 @@ const ContactsList = () => {
     setIsAddNumber(true);
   };
 
-  const showSheet = () => {
-    SheetManager.show('view', {
-      payload: <View>{/* Add your content here */}</View>,
-    });
-  };
-
-  const onChangeMarkSpam = (item: any) => {
-    const updatedContacts = listContacts.map((contact: any) => {
-      if (contact.phoneNumber === item.phoneNumber) {
-        return {
-          ...contact,
-          isSpam: !contact.isSpam,
-        };
-      }
-      return contact;
-    });
-    setListContacts(updatedContacts);
-    saveContactToStorage(updatedContacts);
+  const closeSheet = () => {
+    setIsAddNumber(false);
   };
 
   if (loading)
@@ -218,39 +178,17 @@ const ContactsList = () => {
       </TabView>
       <Button
         title="Thêm số"
-        onPress={showSheet}
+        onPress={onPressAddNumber}
         containerStyle={{margin: 16}}
       />
-      <Dialog
-        isVisible={isAddNumber}
-        onBackdropPress={() => setIsAddNumber(false)}
-        overlayStyle={{
-          borderRadius: 16,
-          padding: 16,
-          width: '90%',
-          height: 350,
+      <CategorizeNumber isVisible={isAddNumber} onClose={closeSheet} />
+      <Button
+        title="Xem danh sách đã phân loại"
+        onPress={() => {
+          /* Add functionality to view categorized numbers */
         }}
-        animationType="fade">
-        <View style={{justifyContent: 'center', alignItems: 'center', flex: 1}}>
-          <Text style={styles.headerTitle}>Thêm số điện thoại tin tưởng</Text>
-          <Input
-            placeholder="Nhập số điện thoại"
-            leftIcon={{type: 'font-awesome', name: 'phone', color: '#18538C'}}
-            containerStyle={{width: '100%', marginBottom: 16}}
-            value={newNumber}
-            onChangeText={setNewNumber}
-          />
-          <View>
-            <RadioButton
-              value="first"
-              status={'checked'}
-              // onPress={() => setChecked('first')}
-            />
-            <RadioButton value="Tin tưởng" color="#18538C" />
-          </View>
-          <Button title="OK" onPress={addNewContact} />
-        </View>
-      </Dialog>
+        containerStyle={{margin: 16}}
+      />
     </View>
   );
 };

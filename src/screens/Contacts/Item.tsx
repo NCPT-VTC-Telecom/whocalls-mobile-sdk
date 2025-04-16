@@ -37,7 +37,7 @@ const Item = ({item}: {item: ContactList}) => {
           {item?.item?.displayName}
         </Text>
         <Text style={{fontSize: 13, marginHorizontal: 8}}>
-          {item?.item?.phoneNumbers.find((i: any) => i?.label === 'Mobile')
+          {item?.item?.numbers?.find((i: any) => i?.label === 'Mobile')
             ?.number || 'Chưa được cập nhật'}
         </Text>
       </View>
