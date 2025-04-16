@@ -57,5 +57,7 @@ class MainActivity : ReactActivity() {
     private fun accessContacts() {
         // Code to access contacts
     }
+
+
 }
 

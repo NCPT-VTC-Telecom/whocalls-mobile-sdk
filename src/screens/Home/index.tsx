@@ -26,12 +26,6 @@ const CheckInformation = () => {
 
   useEffect(() => {
     initialiseSDK();
-    // updateDatabase();
-    // Check for phone state permission
-    // This is required for Android to manage phone calls
-    // and get information about the phone number
-    // You can also check for other permissions if needed
-    // checkPhoneStatePermission();
     if (Platform.OS === 'android') {
       checkPhoneStatePermission();
     }

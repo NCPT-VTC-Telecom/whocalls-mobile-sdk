@@ -18,18 +18,14 @@ import {Input} from '@rneui/themed';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Text from '../../components/Text';
 import EmptyComponents from '../../components/Empty';
-import Loading from '../../components/Loading';
 import Item from './Item';
-import {RadioButton} from 'react-native-paper';
-import {SheetManager} from 'react-native-actions-sheet';
-import Toast from 'react-native-toast-message';
 import CategorizeNumber from './CategorizeNumber';
 
 const ContactsList = () => {
   const styles = createStyles();
 
   const [permissionStatus, setPermissionStatus] = React.useState(null);
-  const [listContacts, setListContacts] = React.useState<any>([]);
+  const [listContacts, setListContacts] = React.useState<any>({});
   const [loading, setLoading] = React.useState(false);
   const [selectedTab, setSelectedTab] = React.useState(0);
 
@@ -37,10 +33,13 @@ const ContactsList = () => {
   const [newNumber, setNewNumber] = React.useState<string>('');
 
   React.useEffect(() => {
+    loadContactsFromStorage();
+  }, []);
+
+  React.useEffect(() => {
     if (Platform.OS === 'android') {
       checkContactsPermission();
       if (permissionStatus === RESULTS.GRANTED) getContact();
-      loadContactsFromStorage();
     }
   }, [permissionStatus]);
 
@@ -62,11 +61,14 @@ const ContactsList = () => {
       const result: any = await request(PERMISSIONS.ANDROID.READ_CONTACTS);
       setPermissionStatus(result);
       if (result === RESULTS.GRANTED) {
-        Alert.alert('Permission Granted', 'You can now access contacts.');
+        Alert.alert(
+          'Quyền truy cập được chấp thuận',
+          'Bạn có thể truy cập danh bạ.',
+        );
       } else {
         Alert.alert(
-          'Permission Denied',
-          'Cannot access contacts without permission.',
+          'Quyền truy cập bị từ chối',
+          'Không thể truy cập danh bạ mà không có quyền.',
         );
       }
     } catch (error) {
@@ -95,14 +97,14 @@ const ContactsList = () => {
       //     ...parsedContacts,
       //   ]);
       // }
-      setListContacts(storedContacts);
-      console.log('Stored Contacts:', storedContacts);
+      console.log('Stored contacts:', JSON.parse(storedContacts));
+      setListContacts(listContacts?.contactList);
     } catch (error) {
       console.error('Error loading contacts from storage:', error);
     }
   };
 
-  console.log('List Contacts:', listContacts);
+  console.log('List contacts:', listContacts);
 
   const filterContacts = (category: string) => {
     if (!listContacts) return [];
@@ -163,7 +165,7 @@ const ContactsList = () => {
         </TabView.Item>
         <TabView.Item style={styles.tabView}>
           <FlatList
-            data={filterContacts('trust')}
+            data={filterContacts('not-spam')}
             renderItem={renderItem}
             ListEmptyComponent={renderEmpty}
           />
@@ -182,13 +184,6 @@ const ContactsList = () => {
         containerStyle={{margin: 16}}
       />
       <CategorizeNumber isVisible={isAddNumber} onClose={closeSheet} />
-      <Button
-        title="Xem danh sách đã phân loại"
-        onPress={() => {
-          /* Add functionality to view categorized numbers */
-        }}
-        containerStyle={{margin: 16}}
-      />
     </View>
   );
 };

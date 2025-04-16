@@ -115,7 +115,8 @@ public class WhoCallsModule extends ReactContextBaseJavaModule {
     /** Update the SDK Database*/
     updater.updateAllBases((i, i1) -> false);
     Log.d(TAG, "In check number");
-    whoCallsSdk.updateOfflineBases(offlineBasesUpdateResult -> Log.d(TAG, offlineBasesUpdateResult.toString()));
+      assert whoCallsSdk != null;
+      whoCallsSdk.updateOfflineBases(offlineBasesUpdateResult -> Log.d(TAG, offlineBasesUpdateResult.toString()));
     /** Checking the phone reputation */
     PhoneNumber phoneNumber = new PhoneNumberBuilder().setE164PhoneNumber(number).build();
     DatabasePhoneInfo info;
@@ -152,7 +153,6 @@ public class WhoCallsModule extends ReactContextBaseJavaModule {
 
     whoCallsSdk.updateOfflineBases(offlineBasesUpdateResult -> Log.d(TAG, offlineBasesUpdateResult.toString()));
     PhoneNumber phoneNumber = new PhoneNumberBuilder().setE164PhoneNumber(number).build();
-    //whoCallsSdkManager.getCustomNumberListManager().addOrUpdateCustomPhoneInfo(phoneNumber, info);
   }
 
 

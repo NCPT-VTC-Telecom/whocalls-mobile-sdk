@@ -1,9 +1,14 @@
-import {StyleSheet, Text, View, TouchableOpacity} from 'react-native';
+import {StyleSheet, Text, View, TouchableOpacity, Keyboard} from 'react-native';
 import React, {useState} from 'react';
-import {BottomSheet, Input, Button, CheckBox} from '@rneui/themed';
+import {BottomSheet, Button, CheckBox} from '@rneui/themed';
+
+import {TextInput} from 'react-native-paper';
 import Toast from 'react-native-toast-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useSafeAreaInsets} from 'react-native-safe-area-context';
+
+import {KeyboardAvoidingView} from 'react-native';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
 interface CategorizeNumberProps {
   isVisible: boolean;
@@ -53,41 +58,23 @@ const CategorizeNumber: React.FC<CategorizeNumberProps> = ({
   };
 
   return (
-    <BottomSheet isVisible={isVisible} onBackdropPress={onClose}>
-      <View style={styles.modalOverlay}>
+    <KeyboardAvoidingView style={styles.modalOverlay} behavior="padding">
+      <BottomSheet isVisible={isVisible} onBackdropPress={onClose}>
         <View style={styles.modalContainer}>
           <Text style={{fontSize: 20, fontWeight: 'bold', marginVertical: 16}}>
             Thêm số mới
           </Text>
-          <Input
-            style={styles.textInput}
-            placeholder="Nhập số điện thoại"
-            underlineColorAndroid={'white'}
-            value={phoneNumber}
-            onChangeText={setPhoneNumber}
-            keyboardType="phone-pad"
-          />
+          <View style={{flex: 1}}>
+            <TextInput
+              style={styles.textInput}
+              placeholder="Nhập số điện thoại"
+              underlineColorAndroid={'white'}
+              value={phoneNumber}
+              onChangeText={setPhoneNumber}
+              keyboardType="phone-pad"
+            />
+          </View>
           <View style={{flexDirection: 'row', marginBottom: 16, gap: 8}}>
-            {/* <TouchableOpacity
-              style={{
-                flex: 1,
-                padding: 12,
-                backgroundColor: 'green',
-                alignItems: 'center',
-              }}
-              onPress={() => setCategory('not-spam')}>
-              <Text style={{color: 'white'}}>Không Spam</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{
-                flex: 1,
-                backgroundColor: 'red',
-                padding: 12,
-                alignItems: 'center',
-              }}
-              onPress={() => setCategory('Spam')}>
-              {/* Add onPress for Spam button */}
-
             <CheckBox
               center
               title="Spam"
@@ -107,8 +94,8 @@ const CategorizeNumber: React.FC<CategorizeNumberProps> = ({
           </View>
           <Button title="Thêm" onPress={handleAddNumber} />
         </View>
-      </View>
-    </BottomSheet>
+      </BottomSheet>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -120,8 +107,6 @@ const createStyles = () => {
     modalOverlay: {
       gap: 16,
       borderRadius: 16,
-      justifyContent: 'center',
-      alignItems: 'center',
     },
     modalContainer: {
       // flexDirection: 'row',
@@ -137,7 +122,7 @@ const createStyles = () => {
       borderRadius: 8,
       padding: 16,
       marginBottom: 16,
-      width: '100%',
+      flex: 1,
     },
   });
 };

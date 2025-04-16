@@ -8,16 +8,6 @@ import ActionSheet, {
 } from 'react-native-actions-sheet';
 import Text from '../../components/Text';
 
-/** 
-    SheetManager.show('menu', {
-      payload: [{
-        title: t(i.key),
-        leftIcon: <Icon type={i.icon.type} name={i.icon.name} />,
-        onPress: handlePrivacyChange(i.key),
-      }],
-    })
- */
-
 function Menu(props: SheetProps) {
   // const {t} = useTranslation()
   const {height} = useWindowDimensions();
