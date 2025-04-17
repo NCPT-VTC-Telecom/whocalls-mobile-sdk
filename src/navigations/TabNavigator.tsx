@@ -60,13 +60,13 @@ const TabNavigator = () => {
         header: renderHeader(route.name),
       })}>
       <Tab.Screen name="Kiểm tra" component={CheckInformation} />
-      {Platform.OS === 'android' && (
+      {/* {Platform.OS === 'android' && (
         <Tab.Screen
           name="SMS"
           component={SMSPage}
           options={{headerShown: false}}
         />
-      )}
+      )} */}
       <Tab.Screen name="Danh sách" component={ContactsList} />
       <Tab.Screen name="Cài đặt" component={Settings} />
     </Tab.Navigator>

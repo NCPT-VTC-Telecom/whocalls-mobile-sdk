@@ -10,6 +10,8 @@ const Item = ({item}: {item: ContactList}) => {
   const renderSheet = () => {
     <ContactInfo isVisible={true} />;
   };
+
+  console.log(item);
   if (!item) {
     return <View />;
   }
@@ -34,10 +36,10 @@ const Item = ({item}: {item: ContactList}) => {
       />
       <View>
         <Text style={{fontSize: 18, marginHorizontal: 8, fontWeight: '500'}}>
-          {item?.item?.displayName}
+          {item?.item?.name}
         </Text>
         <Text style={{fontSize: 13, marginHorizontal: 8}}>
-          {item?.item?.numbers?.find((i: any) => i?.label === 'Mobile')
+          {item?.item?.numbers?.find?.((i: any) => i?.label === 'Mobile')
             ?.number || 'Chưa được cập nhật'}
         </Text>
       </View>

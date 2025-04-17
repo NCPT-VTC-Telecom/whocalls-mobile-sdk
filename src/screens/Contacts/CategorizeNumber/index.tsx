@@ -22,13 +22,14 @@ const CategorizeNumber: React.FC<CategorizeNumberProps> = ({
   const styles = createStyles();
 
   const [phoneNumber, setPhoneNumber] = useState<string>('');
+  const [name, setName] = useState<string>('');
   const [category, setCategory] = useState<string>('Spam');
   const handleAddNumber = async () => {
     try {
       /** Defining the body for the local log */
       const newEntry = {
         id: Math.random().toString(36).substr(2, 9), // Generate a random ID
-        name: '', // Placeholder for name, can be updated later
+        name: name, // Placeholder for name, can be updated later
         numbers: phoneNumber,
         isBlocked: category === 'Spam', // Block if category is 'Spam'
         category,
@@ -64,16 +65,21 @@ const CategorizeNumber: React.FC<CategorizeNumberProps> = ({
           <Text style={{fontSize: 20, fontWeight: 'bold', marginVertical: 16}}>
             Thêm số mới
           </Text>
-          <View style={{flex: 1}}>
-            <TextInput
-              style={styles.textInput}
-              placeholder="Nhập số điện thoại"
-              underlineColorAndroid={'white'}
-              value={phoneNumber}
-              onChangeText={setPhoneNumber}
-              keyboardType="phone-pad"
-            />
-          </View>
+          <TextInput
+            style={styles.textInput}
+            placeholder="Nhập tên"
+            value={name}
+            onChangeText={setName}
+            keyboardType="phone-pad"
+          />
+          <TextInput
+            style={styles.textInput}
+            placeholder="Nhập số điện thoại"
+            value={phoneNumber}
+            onChangeText={setPhoneNumber}
+            keyboardType="phone-pad"
+          />
+
           <View style={{flexDirection: 'row', marginBottom: 16, gap: 8}}>
             <CheckBox
               center
@@ -118,11 +124,12 @@ const createStyles = () => {
     },
     textInput: {
       borderWidth: 1,
-      borderColor: '#ccc',
+      // borderColor: '#ccc',
       borderRadius: 8,
-      padding: 16,
+      // padding: 16,
+      width: '100%',
       marginBottom: 16,
-      flex: 1,
+      // flex: 1,
     },
   });
 };

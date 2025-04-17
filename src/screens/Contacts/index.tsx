@@ -3,43 +3,42 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
-  Modal,
   Platform,
   StyleSheet,
-  TextInput,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import {BottomSheet, Button, Dialog, Tab, TabView} from '@rneui/themed';
 import {check, request, PERMISSIONS, RESULTS} from 'react-native-permissions';
 import Contacts from 'react-native-contacts';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import {Input} from '@rneui/themed';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Text from '../../components/Text';
 import EmptyComponents from '../../components/Empty';
 import Item from './Item';
 import CategorizeNumber from './CategorizeNumber';
+import {useFocusEffect} from '@react-navigation/native';
 
 const ContactsList = () => {
   const styles = createStyles();
 
   const [permissionStatus, setPermissionStatus] = React.useState(null);
   const [listContacts, setListContacts] = React.useState<any>({});
+  const [localContacts, setLocalContacts] = React.useState<any>([]);
   const [loading, setLoading] = React.useState(false);
   const [selectedTab, setSelectedTab] = React.useState(0);
 
   const [isAddNumber, setIsAddNumber] = React.useState<boolean>(false);
   const [newNumber, setNewNumber] = React.useState<string>('');
 
-  React.useEffect(() => {
-    loadContactsFromStorage();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      loadContactsFromStorage();
+    }, [isAddNumber]),
+  );
 
   React.useEffect(() => {
     if (Platform.OS === 'android') {
       checkContactsPermission();
-      if (permissionStatus === RESULTS.GRANTED) getContact();
+      if (permissionStatus === RESULTS.GRANTED) return;
     }
   }, [permissionStatus]);
 
@@ -65,55 +64,43 @@ const ContactsList = () => {
           'Quyền truy cập được chấp thuận',
           'Bạn có thể truy cập danh bạ.',
         );
-      } else {
+      } else if (result === RESULTS.DENIED) {
         Alert.alert(
           'Quyền truy cập bị từ chối',
           'Không thể truy cập danh bạ mà không có quyền.',
         );
+      } else if (result === RESULTS.BLOCKED) {
+        Alert.alert(
+          'Quyền truy cập bị chặn',
+          'Vui lòng cấp quyền trong cài đặt ứng dụng.',
+        );
+      } else {
+        return;
       }
     } catch (error) {
       console.error('Permission request error:', error);
     }
   };
 
-  const getContact = async () => {
-    try {
-      setLoading(true);
-      const contacts = await Contacts.getAll();
-      setListContacts(contacts);
-      setLoading(false);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   const loadContactsFromStorage = async () => {
     try {
       const storedContacts = await AsyncStorage.getItem('categorizedNumbers');
-      // if (storedContacts) {
-      //   const parsedContacts = JSON.parse(storedContacts);
-      //   setListContacts((prevContacts: any) => [
-      //     ...prevContacts,
-      //     ...parsedContacts,
-      //   ]);
-      // }
-      console.log('Stored contacts:', JSON.parse(storedContacts));
-      setListContacts(listContacts?.contactList);
+      setLocalContacts(storedContacts ? JSON.parse(storedContacts) : []);
     } catch (error) {
       console.error('Error loading contacts from storage:', error);
     }
   };
 
-  console.log('List contacts:', listContacts);
-
   const filterContacts = (category: string) => {
-    if (!listContacts) return [];
+    if (!localContacts) return [];
     if (category === 'not-spam') {
-      return listContacts?.filter?.(i => i?.category === 'not-spam');
+      return localContacts?.contactList?.filter?.(
+        i => i?.category === 'not-spam',
+      );
     } else if (category === 'spam') {
-      return listContacts?.filter?.(i => i?.category === 'spam');
+      return localContacts?.contactList?.filter?.(i => i?.category === 'spam');
     }
-    return listContacts;
+    return localContacts;
   };
 
   const renderItem = (item: any) => {
@@ -121,7 +108,7 @@ const ContactsList = () => {
   };
 
   const renderEmpty = () => {
-    return <EmptyComponents onPress={getContact} />;
+    return <EmptyComponents onPress={() => {}} />;
   };
 
   const onPressAddNumber = () => {
@@ -148,7 +135,6 @@ const ContactsList = () => {
         value={selectedTab}
         onChange={e => setSelectedTab(e)}
         indicatorStyle={styles.tabIndicator}>
-        <Tab.Item title="Tất cả" titleStyle={styles.tabTitle} />
         <Tab.Item title="Tin tưởng" titleStyle={styles.tabTitle} />
         <Tab.Item title="Spam" titleStyle={styles.tabTitle} />
       </Tab>
@@ -156,13 +142,6 @@ const ContactsList = () => {
         value={selectedTab}
         onChange={setSelectedTab}
         animationType="spring">
-        <TabView.Item style={styles.tabView}>
-          <FlatList
-            data={filterContacts('all')}
-            renderItem={renderItem}
-            ListEmptyComponent={renderEmpty}
-          />
-        </TabView.Item>
         <TabView.Item style={styles.tabView}>
           <FlatList
             data={filterContacts('not-spam')}
